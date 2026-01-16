@@ -22,6 +22,9 @@ function doGet(e) {
        return ContentService.createTextOutput(JSON.stringify({"result": "error", "error": "Missing name parameter"}))
       .setMimeType(ContentService.MimeType.JSON);
     }
+    
+    // 去除輸入名字的前後空白，並轉為字串
+    name = String(name).trim();
 
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var lastRow = sheet.getLastRow();
@@ -43,7 +46,10 @@ function doGet(e) {
       var row = data[i];
       var rowName = row[1]; // B欄: 姓名
       
-      if (rowName === name) {
+      // 確保試算表中的名字也轉為字串並去除空白
+      var safeRowName = String(rowName).trim();
+      
+      if (safeRowName === name) {
         // 從 E 欄 (indices 4) 取得 ID 列表
         var wrongIdsRaw = row[4]; 
         var wrongIds = [];
@@ -53,8 +59,7 @@ function doGet(e) {
            wrongIds = [wrongIdsRaw.toString()];
         }
         
-        // 從 F 欄 (indices 5) 取得詳細內容 (為了顯示題目文字)
-        // 為了效能，我們只在該 ID 尚未有詳細資料時解析 JSON，或者解析一次建立一個 lookup map
+        // 從 F 欄 (indices 5) 取得詳細內容
         var detailMap = {};
         var detailJson = row[5];
         if (detailJson) {
@@ -73,7 +78,6 @@ function doGet(e) {
            }
            stats[id].count++;
            
-           // 若尚未有詳細資料，嘗試填入
            if (!stats[id].detail && detailMap[id]) {
              stats[id].detail = detailMap[id];
            }
@@ -86,19 +90,18 @@ function doGet(e) {
     for (var id in stats) {
       if (stats.hasOwnProperty(id)) {
         var item = stats[id];
-        // 確保有詳細資料，若真的沒有(例如舊資料)，補一個 dummy
         var detail = item.detail || { id: id, q: "題目資料缺失", ans: "?", correct: "?" };
         resultList.push({
           id: id,
           count: item.count,
           q: detail.q || detail.question,
-          ans: detail.ans || detail.userAns, // 顯示最新的錯誤答案或其中一個
+          ans: detail.ans || detail.userAns, 
           correct: detail.correct || detail.answer
         });
       }
     }
     
-    // 排序：出現率由高至低 (Count DESC)
+    // 排序：出現率由高至低
     resultList.sort(function(a, b) {
       return b.count - a.count;
     });
