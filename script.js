@@ -1,0 +1,356 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // State
+    const state = {
+        allQuestions: [],
+        currentQuizQuestions: [],
+        currentIndex: 0,
+        userAnswers: {}, // { questionIndex: 'A' | 'B' | 'C' | 'D' }
+        isQuizActive: false,
+        timerInterval: null,
+        timeElapsed: 0,
+        userName: ''
+    };
+
+    // DOM Elements
+    const elements = {
+        startScreen: document.getElementById('start-screen'),
+        quizScreen: document.getElementById('quiz-screen'),
+        resultScreen: document.getElementById('result-screen'),
+        questionCountInput: document.getElementById('question-count'),
+        usernameInput: document.getElementById('username'),
+        maxCountLabel: document.getElementById('max-count-label'),
+        startBtn: document.getElementById('start-btn'),
+        questionText: document.getElementById('question-text'),
+        optionsContainer: document.getElementById('options-container'),
+        progressBar: document.getElementById('progress-bar'),
+        questionNumber: document.getElementById('question-number'),
+        timer: document.getElementById('timer'),
+        prevBtn: document.getElementById('prev-btn'),
+        nextBtn: document.getElementById('next-btn'),
+        submitBtn: document.getElementById('submit-btn'),
+        scoreDisplay: document.getElementById('score-display'),
+        resultSummary: document.getElementById('result-summary'),
+        wrongAnswersList: document.getElementById('wrong-answers-list'),
+        restartBtn: document.getElementById('restart-btn'),
+        downloadBtn: document.getElementById('download-btn'),
+        uploadContainer: document.getElementById('upload-container'),
+        csvUpload: document.getElementById('csv-upload')
+    };
+
+    // Initialize
+    init();
+
+    async function init() {
+        setupEventListeners();
+        try {
+            await loadQuestions();
+        } catch (error) {
+            console.warn('Auto-load failed, switching to manual mode:', error);
+            elements.maxCountLabel.textContent = '自動載入失敗';
+            elements.maxCountLabel.style.color = '#ef4444';
+            elements.uploadContainer.classList.remove('hidden');
+        }
+    }
+
+    async function loadQuestions() {
+        // Fetch CSV file
+        const response = await fetch('基礎描繪組-學科題庫.csv');
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const text = await response.text();
+        parseCSV(text);
+        updateUIWithData();
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target.result;
+            parseCSV(text);
+            updateUIWithData();
+            elements.uploadContainer.classList.add('hidden'); // Hide upload after success
+            elements.maxCountLabel.style.color = ''; // Reset color
+        };
+        reader.readAsText(file);
+    }
+
+    function updateUIWithData() {
+        if (state.allQuestions.length > 0) {
+            elements.questionCountInput.max = state.allQuestions.length;
+            elements.maxCountLabel.textContent = `共有 ${state.allQuestions.length} 題可用`;
+            elements.startBtn.disabled = false;
+        }
+    }
+
+    function parseCSV(csvText) {
+        const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
+        // Assume first line is header
+        const headers = lines[0].split(',');
+
+        // CSV Format based on inspection:
+        // 編號,解答,題目,選項A,選項B,選項C,選項D
+        // Indices likely: 0=ID, 1=Answer, 2=Question, 3=A, 4=B, 5=C, 6=D
+
+        state.allQuestions = lines.slice(1).map(line => {
+            // Handle CSV parsing more robustly if needed (e.g. quotes), but for now split by comma
+            // If fields contain commas, this simple split needs regex
+            // Improved split for CSV allowing quotes
+            const parts = parseCSVLine(line);
+
+            if (parts.length < 7) return null; // Skip invalid lines
+
+            return {
+                id: parts[0],
+                answer: parts[1], // Expected 'A', 'B', 'C', 'D'
+                question: parts[2],
+                options: {
+                    A: parts[3],
+                    B: parts[4],
+                    C: parts[5],
+                    D: parts[6]
+                }
+            };
+        }).filter(item => item !== null);
+    }
+
+    function parseCSVLine(text) {
+        // Simple parser that handles basic quoted commas
+        let re_value = /(?!\s*$)\s*(?:'([^']*)'|"([^"]*)"|([^,'"]*))\s*(?:,|$)/g;
+        let a = [];
+        text.replace(re_value, function (m0, m1, m2, m3) {
+            if (m1 !== undefined) a.push(m1.replace(/\\'/g, "'"));
+            else if (m2 !== undefined) a.push(m2.replace(/\\"/g, '"'));
+            else if (m3 !== undefined) a.push(m3);
+            return '';
+        });
+        if (/,\s*$/.test(text)) a.push('');
+        return a;
+    }
+
+    function setupEventListeners() {
+        elements.startBtn.addEventListener('click', startQuiz);
+        elements.prevBtn.addEventListener('click', () => navigateQuestion(-1));
+        elements.nextBtn.addEventListener('click', () => navigateQuestion(1));
+        elements.submitBtn.addEventListener('click', submitQuiz);
+        elements.restartBtn.addEventListener('click', resetQuiz);
+        elements.downloadBtn.addEventListener('click', downloadReport);
+        if (elements.csvUpload) {
+            elements.csvUpload.addEventListener('change', handleFileUpload);
+        }
+
+        // Allow keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!state.isQuizActive) return;
+            if (e.key === 'ArrowRight') navigateQuestion(1);
+            if (e.key === 'ArrowLeft') navigateQuestion(-1);
+        });
+    }
+
+    function startQuiz() {
+        const name = elements.usernameInput.value.trim();
+        if (!name) {
+            alert('請輸入考生姓名');
+            return;
+        }
+        state.userName = name;
+
+        const count = Math.min(
+            parseInt(elements.questionCountInput.value) || 20,
+            state.allQuestions.length
+        );
+
+        if (count <= 0) return;
+
+        // Shuffle and select questions
+        state.currentQuizQuestions = shuffleArray([...state.allQuestions]).slice(0, count);
+        state.currentIndex = 0;
+        state.userAnswers = {};
+        state.isQuizActive = true;
+        state.timeElapsed = 0;
+
+        // Start Timer
+        if (state.timerInterval) clearInterval(state.timerInterval);
+        state.timerInterval = setInterval(updateTimer, 1000);
+
+        // Switch Screen
+        switchScreen('quiz-screen');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const currentQ = state.currentQuizQuestions[state.currentIndex];
+        const total = state.currentQuizQuestions.length;
+
+        // Update Info
+        elements.questionNumber.textContent = `Question ${state.currentIndex + 1}/${total}`;
+        elements.progressBar.style.width = `${((state.currentIndex + 1) / total) * 100}%`;
+        elements.questionText.textContent = currentQ.question;
+
+        // Generate Options
+        elements.optionsContainer.innerHTML = '';
+        ['A', 'B', 'C', 'D'].forEach(key => {
+            const optionText = currentQ.options[key];
+            const isSelected = state.userAnswers[state.currentIndex] === key;
+
+            const card = document.createElement('div');
+            card.className = `option-card ${isSelected ? 'selected' : ''}`;
+            card.dataset.value = key;
+            card.onclick = () => selectOption(key);
+
+            card.innerHTML = `
+                <div class="option-marker">${key}</div>
+                <div class="option-text">${optionText}</div>
+            `;
+            elements.optionsContainer.appendChild(card);
+        });
+
+        // Update Navigation Buttons
+        elements.prevBtn.classList.toggle('hidden', state.currentIndex === 0);
+
+        if (state.currentIndex === total - 1) {
+            elements.nextBtn.classList.add('hidden');
+            elements.submitBtn.classList.remove('hidden');
+        } else {
+            elements.nextBtn.classList.remove('hidden');
+            elements.submitBtn.classList.add('hidden');
+        }
+    }
+
+    function selectOption(key) {
+        state.userAnswers[state.currentIndex] = key;
+        renderQuestion(); // Re-render to show selection
+    }
+
+    function navigateQuestion(direction) {
+        const newIndex = state.currentIndex + direction;
+        if (newIndex >= 0 && newIndex < state.currentQuizQuestions.length) {
+            state.currentIndex = newIndex;
+            renderQuestion();
+        }
+    }
+
+    function submitQuiz() {
+        if (!confirm('確定要交卷嗎？')) return;
+
+        clearInterval(state.timerInterval);
+        state.isQuizActive = false;
+
+        calculateResults();
+        switchScreen('result-screen');
+    }
+
+    function calculateResults() {
+        let score = 0;
+        const total = state.currentQuizQuestions.length;
+        const wrongAnswers = [];
+
+        state.currentQuizQuestions.forEach((q, index) => {
+            const userAns = state.userAnswers[index];
+            if (userAns === q.answer) {
+                score++;
+            } else {
+                wrongAnswers.push({
+                    question: q,
+                    userAns: userAns || '未作答'
+                });
+            }
+        });
+
+        const finalScore = Math.round((score / total) * 100);
+
+        // Update UI
+        elements.scoreDisplay.textContent = finalScore;
+        elements.resultSummary.textContent = `答對 ${score} / ${total} 題`;
+
+        // Render Wrong Answers
+        elements.wrongAnswersList.innerHTML = '';
+        if (wrongAnswers.length === 0) {
+            elements.wrongAnswersList.innerHTML = '<div style="text-align:center; padding: 2rem;">太棒了！全對！🎉</div>';
+        } else {
+            wrongAnswers.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'review-item';
+                el.innerHTML = `
+                    <div class="review-question">${item.question.id}. ${item.question.question}</div>
+                    <div class="review-answer user-answer">您的答案：${item.userAns}</div>
+                    <div class="review-answer correct-answer">正確答案：${item.question.answer} (${item.question.options[item.question.answer]})</div>
+                `;
+                elements.wrongAnswersList.appendChild(el);
+            });
+        }
+    }
+
+    function resetQuiz() {
+        elements.usernameInput.value = ''; // Clear name
+        switchScreen('start-screen');
+    }
+
+    function downloadReport() {
+        const date = new Date().toLocaleString('zh-TW');
+        let content = `學科題庫測驗成績單\n`;
+        content += `================================\n`;
+        content += `姓名: ${state.userName}\n`;
+        content += `日期: ${date}\n`;
+        content += `得分: ${elements.scoreDisplay.textContent} 分\n`;
+        content += `答對: ${elements.resultSummary.textContent}\n`;
+        content += `================================\n\n`;
+
+        content += `[錯題檢討]\n`;
+        const reviewItems = elements.wrongAnswersList.querySelectorAll('.review-item');
+        if (reviewItems.length === 0) {
+            content += `恭喜！全對！無錯題。\n`;
+        } else {
+            // Re-calculate wrong answers from state for cleaner data access
+            state.currentQuizQuestions.forEach((q, index) => {
+                const userAns = state.userAnswers[index];
+                if (userAns !== q.answer) {
+                    content += `題目 (${q.id}): ${q.question}\n`;
+                    content += `您的答案: ${userAns || '未作答'}\n`;
+                    content += `正確答案: ${q.answer} (${q.options[q.answer]})\n`;
+                    content += `--------------------------------\n`;
+                }
+            });
+        }
+
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${state.userName}_成績單.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => {
+            s.classList.remove('active');
+            s.classList.add('hidden');
+        });
+        const target = document.getElementById(screenId);
+        target.classList.remove('hidden');
+        // Small delay to allow display:block to apply before opacity transition
+        setTimeout(() => {
+            target.classList.add('active');
+        }, 10);
+    }
+
+    function updateTimer() {
+        state.timeElapsed++;
+        const minutes = Math.floor(state.timeElapsed / 60).toString().padStart(2, '0');
+        const seconds = (state.timeElapsed % 60).toString().padStart(2, '0');
+        elements.timer.textContent = `${minutes}:${seconds}`;
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+});
