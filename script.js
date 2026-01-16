@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Configuration
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzom0lWwH4dpZ5LiDqUSKqvQjBTwGSTBNEGfR3204O7lokRWhGoeMar4kdGysKpbj-O/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxM8LQveR882cyLoC6YckCjOl5Jv7wfywAzXDicIvr-NAcoswGcZ66-BPOhlRSFvMX/exec";
 
     // Initialize
     init();
@@ -314,20 +314,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         wrongItems.forEach(item => {
-            // item structure from backend: {id, q, ans, correct}
-            // BUT check parsing: "q" might be mapped from "question" in the history
-            // Let's assume the backend aligns with what we stored. 
-            // Stored: {id, q, ans, correct}
-
-            // Check if we can enhance it with current bank data?
-            // The history item has the question text (q), so use that.
+            // item from backend: {id, count, q, ans, correct}
 
             const el = document.createElement('div');
             el.className = 'review-item';
             el.innerHTML = `
-                 <div class="review-question">${item.id}. ${item.q || item.question}</div>
-                 <div class="review-answer user-answer">您的歷史誤答：${item.ans || item.userAns}</div>
-                 <div class="review-answer correct-answer">正確答案：${item.correct || item.answer}</div>
+                 <div class="review-question">
+                    <span style="color: #ef4444; font-weight: bold; margin-right: 8px;">[錯 ${item.count} 次]</span>
+                    ${item.id}. ${item.q}
+                 </div>
+                 <div class="review-answer user-answer">您的歷史誤答：${item.ans}</div>
+                 <div class="review-answer correct-answer">正確答案：${item.correct}</div>
              `;
             elements.historyList.appendChild(el);
         });

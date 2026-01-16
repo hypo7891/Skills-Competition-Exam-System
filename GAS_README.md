@@ -32,42 +32,75 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
     }
     
-    // 取得所有資料 (假設資料量不大，一次讀取比較快)
+    // 取得所有資料
     // 範圍：A2 到 F最後一列
     var data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
     
-    // 收集該考生的錯題
-    var wrongQuestionsMap = {}; // 用 ID 當 key 去除重複
+    // 統計錯題頻率與內容
+    var stats = {}; // { "id": { count: 0, detail: object } }
     
-    // 倒序讀取，優先顯示最近的錯題 (雖然 map 會去重，但我們可以先保留最新的)
-    for (var i = data.length - 1; i >= 0; i--) {
+    for (var i = 0; i < data.length; i++) {
       var row = data[i];
       var rowName = row[1]; // B欄: 姓名
-      var detailJson = row[5]; // F欄: 詳細
       
-      if (rowName === name && detailJson) {
-        try {
-          var details = JSON.parse(detailJson);
-          details.forEach(function(item) {
-            // item 結構: {id, q, ans, correct}
-            if (!wrongQuestionsMap[item.id]) {
-               wrongQuestionsMap[item.id] = item;
-            }
-          });
-        } catch (e) {
-          // Ignore parse errors
+      if (rowName === name) {
+        // 從 E 欄 (indices 4) 取得 ID 列表
+        var wrongIdsRaw = row[4]; 
+        var wrongIds = [];
+        if (typeof wrongIdsRaw === 'string') {
+           wrongIds = wrongIdsRaw.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ""; });
+        } else if (typeof wrongIdsRaw === 'number') {
+           wrongIds = [wrongIdsRaw.toString()];
         }
+        
+        // 從 F 欄 (indices 5) 取得詳細內容 (為了顯示題目文字)
+        // 為了效能，我們只在該 ID 尚未有詳細資料時解析 JSON，或者解析一次建立一個 lookup map
+        var detailMap = {};
+        var detailJson = row[5];
+        if (detailJson) {
+           try {
+             var details = JSON.parse(detailJson);
+             details.forEach(function(item) {
+               detailMap[item.id] = item;
+             });
+           } catch (e) { /* ignore */ }
+        }
+
+        // 更新統計
+        wrongIds.forEach(function(id) {
+           if (!stats[id]) {
+             stats[id] = { count: 0, detail: null };
+           }
+           stats[id].count++;
+           
+           // 若尚未有詳細資料，嘗試填入
+           if (!stats[id].detail && detailMap[id]) {
+             stats[id].detail = detailMap[id];
+           }
+        });
       }
     }
     
-    // 轉回陣列
-    var resultList = Object.keys(wrongQuestionsMap).map(function(key) {
-      return wrongQuestionsMap[key];
-    });
+    // 轉為陣列
+    var resultList = [];
+    for (var id in stats) {
+      if (stats.hasOwnProperty(id)) {
+        var item = stats[id];
+        // 確保有詳細資料，若真的沒有(例如舊資料)，補一個 dummy
+        var detail = item.detail || { id: id, q: "題目資料缺失", ans: "?", correct: "?" };
+        resultList.push({
+          id: id,
+          count: item.count,
+          q: detail.q || detail.question,
+          ans: detail.ans || detail.userAns, // 顯示最新的錯誤答案或其中一個
+          correct: detail.correct || detail.answer
+        });
+      }
+    }
     
-    // 根據 ID 排序 (可選)
+    // 排序：出現率由高至低 (Count DESC)
     resultList.sort(function(a, b) {
-      return parseInt(a.id) - parseInt(b.id);
+      return b.count - a.count;
     });
     
     return ContentService.createTextOutput(JSON.stringify(resultList))
