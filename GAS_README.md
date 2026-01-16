@@ -21,13 +21,15 @@ function doPost(e) {
     // 取得目前的試算表與工作表
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     
-    // 準備要寫入的資料列 (順序：時間, 姓名, 分數, 答對題數, 詳細內容)
+    // 準備要寫入的資料列 
+    // 順序：時間(Client端), 姓名, 分數, 答對題數, 錯題編號, 詳細內容
     var rowData = [
-      new Date(),       // A欄: 時間
-      data.name,        // B欄: 姓名
-      data.score,       // C欄: 分數
-      data.summary,     // D欄: 答對題數 summary
-      data.detail       // E欄: 詳細 (JSON string or text)
+      data.time || new Date(), // A欄: 時間
+      data.name,               // B欄: 姓名
+      data.score,              // C欄: 分數
+      data.summary,            // D欄: 答對題數 summary
+      data.wrong_ids,          // E欄: 錯題編號 (New)
+      data.detail              // F欄: 詳細 (JSON string or text)
     ];
     
     // 寫入試算表

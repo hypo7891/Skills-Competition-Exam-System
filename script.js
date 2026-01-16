@@ -8,7 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
         isQuizActive: false,
         timerInterval: null,
         timeElapsed: 0,
-        userName: ''
+        timeElapsed: 0,
+        userName: '',
+        vipList: []
     };
 
     // DOM Elements
@@ -38,12 +40,27 @@ document.addEventListener('DOMContentLoaded', () => {
         csvUpload: document.getElementById('csv-upload')
     };
 
+    // Configuration
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFD_ThvNGYergAJ2cBB8iK-nqni_4fcZZdgrmfKQbOm5JVLSabatmBiHGCiJtQiam-/exec";
+
     // Initialize
     init();
 
     async function init() {
         setupEventListeners();
         try {
+            // Load VIP List
+            try {
+                const vipResponse = await fetch('vip_list.json');
+                if (vipResponse.ok) {
+                    state.vipList = await vipResponse.json();
+                } else {
+                    console.warn('Failed to load VIP list');
+                }
+            } catch (err) {
+                console.warn('Error loading VIP list:', err);
+            }
+
             // Load manifest
             const manifestResponse = await fetch('questions/manifest.json');
             if (!manifestResponse.ok) throw new Error('Failed to load manifest');
@@ -337,6 +354,26 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.scoreDisplay.textContent = finalScore;
         elements.resultSummary.textContent = `答對 ${score} / ${total} 題`;
 
+        // VIP Logging
+        if (state.vipList.includes(state.userName)) {
+            const wrongIds = wrongAnswers.map(w => w.question.id).join(', ');
+            const currentDateTime = new Date().toLocaleString('zh-TW', { hour12: false });
+
+            submitToGoogleSheet({
+                time: currentDateTime,
+                name: state.userName,
+                score: finalScore,
+                summary: `答對 ${score} / ${total} 題`,
+                wrong_ids: wrongIds,
+                detail: JSON.stringify(wrongAnswers.map(w => ({
+                    id: w.question.id,
+                    q: w.question.question,
+                    ans: w.userAns,
+                    correct: w.question.answer
+                })))
+            });
+        }
+
         // Render Wrong Answers
         elements.wrongAnswersList.innerHTML = '';
         if (wrongAnswers.length === 0) {
@@ -424,5 +461,26 @@ document.addEventListener('DOMContentLoaded', () => {
             [array[i], array[j]] = [array[j], array[i]];
         }
         return array;
+    }
+
+    async function submitToGoogleSheet(data) {
+        if (!GOOGLE_SCRIPT_URL) return;
+
+        try {
+            // Since we're making a cross-origin request to Google Apps Script, 
+            // no-cors mode is often used to avoid CORS errors, 
+            // but for a robust solution that gets a response, we rely on the script being set to 'Anyone'
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Important for simple submission without CORS preflight issues
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            console.log('VIP result submitted');
+        } catch (error) {
+            console.error('Error submitting VIP result:', error);
+        }
     }
 });
