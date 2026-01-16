@@ -318,13 +318,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const el = document.createElement('div');
             el.className = 'review-item';
+
+            // Requested format: 編號、題目、答案、錯題次數
+            // We'll organize it cleanly.
             el.innerHTML = `
                  <div class="review-question">
-                    <span style="color: #ef4444; font-weight: bold; margin-right: 8px;">[錯 ${item.count} 次]</span>
-                    ${item.id}. ${item.q}
+                    <span style="display:inline-block; min-width: 40px; font-weight:800; color:var(--primary-color);">#${item.id}</span>
+                    <span style="font-weight: 500;">${item.q}</span>
                  </div>
-                 <div class="review-answer user-answer">您的歷史誤答：${item.ans}</div>
-                 <div class="review-answer correct-answer">正確答案：${item.correct}</div>
+                 <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div class="review-answer correct-answer" style="margin-bottom:0;">答案：${item.correct}</div>
+                    <div style="background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                        錯題次數：${item.count}
+                    </div>
+                 </div>
              `;
             elements.historyList.appendChild(el);
         });
