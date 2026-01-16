@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Configuration
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFD_ThvNGYergAJ2cBB8iK-nqni_4fcZZdgrmfKQbOm5JVLSabatmBiHGCiJtQiam-/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3OUFr9kf43EBKuv17wLkzR4W7wQgs-VoH90OKqGnffTVtZO-fnBRADUcPoVtRqZVb/exec";
 
     // Initialize
     init();
@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 mode: 'no-cors', // Important for simple submission without CORS preflight issues
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'text/plain;charset=utf-8'
                 },
                 body: JSON.stringify(data)
             });
