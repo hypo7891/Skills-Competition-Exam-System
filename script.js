@@ -37,11 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
         restartBtn: document.getElementById('restart-btn'),
         downloadBtn: document.getElementById('download-btn'),
         uploadContainer: document.getElementById('upload-container'),
-        csvUpload: document.getElementById('csv-upload')
+        csvUpload: document.getElementById('csv-upload'),
+        historyBtn: document.getElementById('history-btn'),
+        historyScreen: document.getElementById('history-screen'),
+        historyBackBtn: document.getElementById('history-back-btn'),
+        historyList: document.getElementById('history-list'),
+        historyLoading: document.getElementById('history-loading'),
+        historyContent: document.getElementById('history-content')
     };
 
     // Configuration
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3OUFr9kf43EBKuv17wLkzR4W7wQgs-VoH90OKqGnffTVtZO-fnBRADUcPoVtRqZVb/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzom0lWwH4dpZ5LiDqUSKqvQjBTwGSTBNEGfR3204O7lokRWhGoeMar4kdGysKpbj-O/exec";
 
     // Initialize
     init();
@@ -221,6 +227,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupEventListeners() {
         elements.bankSelect.addEventListener('change', (e) => loadQuestions(e.target.value));
         elements.startBtn.addEventListener('click', startQuiz);
+        elements.historyBtn.addEventListener('click', showHistory);
+        elements.historyBackBtn.addEventListener('click', () => switchScreen('start-screen'));
         elements.prevBtn.addEventListener('click', () => navigateQuestion(-1));
         elements.nextBtn.addEventListener('click', () => navigateQuestion(1));
         elements.submitBtn.addEventListener('click', submitQuiz);
@@ -267,6 +275,62 @@ document.addEventListener('DOMContentLoaded', () => {
         // Switch Screen
         switchScreen('quiz-screen');
         renderQuestion();
+    }
+
+    async function showHistory() {
+        const name = elements.usernameInput.value.trim();
+        if (!name) {
+            alert('請先輸入考生姓名，才能查詢歷史錯題。');
+            return;
+        }
+
+        switchScreen('history-screen');
+        elements.historyLoading.style.display = 'block';
+        elements.historyContent.style.display = 'none';
+        elements.historyList.innerHTML = '';
+
+        try {
+            // Fetch from GAS
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}`);
+            if (!response.ok) throw new Error('Network error');
+            const data = await response.json();
+
+            renderHistory(data);
+        } catch (error) {
+            console.error('History fetch failed:', error);
+            elements.historyList.innerHTML = '<div style="text-align:center; padding: 2rem; color: #ef4444;">讀取失敗，請稍後再試。<br>請確認後端腳本已更新並部署。</div>';
+        } finally {
+            elements.historyLoading.style.display = 'none';
+            elements.historyContent.style.display = 'block';
+        }
+    }
+
+    function renderHistory(wrongItems) {
+        elements.historyList.innerHTML = '';
+
+        if (!Array.isArray(wrongItems) || wrongItems.length === 0) {
+            elements.historyList.innerHTML = '<div style="text-align:center; padding: 2rem;">查無錯題紀錄，太棒了！🎉</div>';
+            return;
+        }
+
+        wrongItems.forEach(item => {
+            // item structure from backend: {id, q, ans, correct}
+            // BUT check parsing: "q" might be mapped from "question" in the history
+            // Let's assume the backend aligns with what we stored. 
+            // Stored: {id, q, ans, correct}
+
+            // Check if we can enhance it with current bank data?
+            // The history item has the question text (q), so use that.
+
+            const el = document.createElement('div');
+            el.className = 'review-item';
+            el.innerHTML = `
+                 <div class="review-question">${item.id}. ${item.q || item.question}</div>
+                 <div class="review-answer user-answer">您的歷史誤答：${item.ans || item.userAns}</div>
+                 <div class="review-answer correct-answer">正確答案：${item.correct || item.answer}</div>
+             `;
+            elements.historyList.appendChild(el);
+        });
     }
 
     function renderQuestion() {

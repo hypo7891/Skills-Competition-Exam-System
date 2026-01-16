@@ -13,6 +13,72 @@
    - 貼上以下程式碼：
 
 ```javascript
+
+function doGet(e) {
+  try {
+    // 檢查是否有傳入 name 參數
+    var name = e.parameter.name;
+    if (!name) {
+       return ContentService.createTextOutput(JSON.stringify({"result": "error", "error": "Missing name parameter"}))
+      .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var lastRow = sheet.getLastRow();
+    
+    // 若無資料
+    if (lastRow < 2) {
+      return ContentService.createTextOutput(JSON.stringify([]))
+      .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // 取得所有資料 (假設資料量不大，一次讀取比較快)
+    // 範圍：A2 到 F最後一列
+    var data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
+    
+    // 收集該考生的錯題
+    var wrongQuestionsMap = {}; // 用 ID 當 key 去除重複
+    
+    // 倒序讀取，優先顯示最近的錯題 (雖然 map 會去重，但我們可以先保留最新的)
+    for (var i = data.length - 1; i >= 0; i--) {
+      var row = data[i];
+      var rowName = row[1]; // B欄: 姓名
+      var detailJson = row[5]; // F欄: 詳細
+      
+      if (rowName === name && detailJson) {
+        try {
+          var details = JSON.parse(detailJson);
+          details.forEach(function(item) {
+            // item 結構: {id, q, ans, correct}
+            if (!wrongQuestionsMap[item.id]) {
+               wrongQuestionsMap[item.id] = item;
+            }
+          });
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+    }
+    
+    // 轉回陣列
+    var resultList = Object.keys(wrongQuestionsMap).map(function(key) {
+      return wrongQuestionsMap[key];
+    });
+    
+    // 根據 ID 排序 (可選)
+    resultList.sort(function(a, b) {
+      return parseInt(a.id) - parseInt(b.id);
+    });
+    
+    return ContentService.createTextOutput(JSON.stringify(resultList))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+     return ContentService.createTextOutput(JSON.stringify({"result": "error", "error": error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
 function doPost(e) {
   try {
     // 取得資料
@@ -40,10 +106,11 @@ function doPost(e) {
       .setMimeType(ContentService.MimeType.JSON);
       
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({"result": "error", "error": error.toString()}))
+     return ContentService.createTextOutput(JSON.stringify({"result": "error", "error": error.toString()}))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
+
 ```
 
 4. **部署為網頁應用程式**

@@ -48,7 +48,28 @@
 
 
 
-            <button id="start-btn" class="btn primary-btn" disabled>開始測驗</button>
+            <div class="button-group"
+                style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-top: 1rem;">
+                <button id="start-btn" class="btn primary-btn" disabled style="flex: 2;">開始測驗</button>
+                <button id="history-btn" class="btn secondary-btn" style="flex: 1;">錯題回顧</button>
+            </div>
+        </div>
+
+        <!-- History Screen -->
+        <div id="history-screen" class="screen hidden">
+            <div class="quiz-header" style="justify-content: center; position: relative;">
+                <h2 class="title" style="font-size: 1.8rem;">歷史錯題回顧</h2>
+                <button id="history-back-btn" class="btn secondary-btn"
+                    style="position: absolute; left: 0; padding: 8px 16px;">返回</button>
+            </div>
+
+            <div id="history-loading" class="info-text" style="text-align: center; margin: 20px;">載入中...</div>
+
+            <div class="review-section" id="history-content">
+                <div id="history-list" class="wrong-list">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
         </div>
 
         <!-- Quiz Screen -->
