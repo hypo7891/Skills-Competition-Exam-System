@@ -108,7 +108,7 @@ body {
     gap: 10px;
     width: 100%;
     max-width: 300px;
-    text-align: left;
+    text-align: center;
 }
 
 .control-group label {
