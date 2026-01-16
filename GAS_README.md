@@ -1,0 +1,59 @@
+# Google Apps Script Setup Instructions
+
+為了讓 VIP 考生的成績能自動填入 Google 試算表，請依照以下步驟設定後端腳本：
+
+1. **開啟您的 Google 試算表**
+   - [點此開啟您的試算表](https://docs.google.com/spreadsheets/d/1nogCcWFBGRN212xQBQHcJdYrZEgcSWAROHrBKgK7vyE/edit?usp=sharing)
+
+2. **開啟 Apps Script**
+   - 在上方選單點選 **擴充功能 (Extensions)** > **Apps Script**。
+
+3. **貼上程式碼**
+   - 刪除編輯器中原有的程式碼 (`function myFunction() {...}`)。
+   - 貼上以下程式碼：
+
+```javascript
+function doPost(e) {
+  try {
+    // 取得資料
+    var data = JSON.parse(e.postData.contents);
+    
+    // 取得目前的試算表與工作表
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    // 準備要寫入的資料列 (順序：時間, 姓名, 分數, 答對題數, 詳細內容)
+    var rowData = [
+      new Date(),       // A欄: 時間
+      data.name,        // B欄: 姓名
+      data.score,       // C欄: 分數
+      data.summary,     // D欄: 答對題數 summary
+      data.detail       // E欄: 詳細 (JSON string or text)
+    ];
+    
+    // 寫入試算表
+    sheet.appendRow(rowData);
+    
+    // 回傳成功訊息
+    return ContentService.createTextOutput(JSON.stringify({"result": "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({"result": "error", "error": error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+4. **部署為網頁應用程式**
+   - 點選右上角的 **部署 (Deploy)** > **新增部署 (New deployment)**。
+   - 點選左側齒輪圖示 > **網頁應用程式 (Web app)**。
+   - 設定如下：
+     - **說明**: `VIP 成績紀錄` (隨意填寫)
+     - **執行身分 (Execute as)**: **我 (Me)**
+     - **誰可以存取 (Who has access)**: **任何人 (Anyone)** (這點很重要，否則前端無法寫入)
+   - 點選 **部署 (Deploy)**。
+   - (若跳出授權視窗，請點選 **核對權限** > 選擇帳號 > **進階** > **前往... (不安全)** > **允許**)
+
+5. **複製網址**
+   - 部署成功後，會顯示一串 **Web App URL** (以 `https://script.google.com/...` 開頭)。
+   - **請複製這串網址**，並貼給 AI，或稍後自行填入 `script.js` 中。
