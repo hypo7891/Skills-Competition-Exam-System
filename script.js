@@ -52,16 +52,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Populate select
             const select = elements.bankSelect;
             select.innerHTML = ''; // Clear existing
-            manifest.forEach(bank => {
+            manifest.forEach(filename => {
                 const option = document.createElement('option');
-                option.value = bank.file;
-                option.textContent = bank.name;
+                option.value = filename;
+                option.textContent = filename.replace('.json', '');
                 select.appendChild(option);
             });
 
             // Load first bank
             if (manifest.length > 0) {
-                await loadQuestions(manifest[0].file);
+                await loadQuestions(manifest[0]);
             }
         } catch (error) {
             console.warn('Auto-load failed:', error);
