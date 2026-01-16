@@ -44,10 +44,28 @@ document.addEventListener('DOMContentLoaded', () => {
     async function init() {
         setupEventListeners();
         try {
-            await loadQuestions();
+            // Load manifest
+            const manifestResponse = await fetch('questions/manifest.json');
+            if (!manifestResponse.ok) throw new Error('Failed to load manifest');
+            const manifest = await manifestResponse.json();
+
+            // Populate select
+            const select = elements.bankSelect;
+            select.innerHTML = ''; // Clear existing
+            manifest.forEach(bank => {
+                const option = document.createElement('option');
+                option.value = bank.file;
+                option.textContent = bank.name;
+                select.appendChild(option);
+            });
+
+            // Load first bank
+            if (manifest.length > 0) {
+                await loadQuestions(manifest[0].file);
+            }
         } catch (error) {
-            console.warn('Auto-load failed, switching to manual mode:', error);
-            elements.maxCountLabel.textContent = '自動載入失敗，請手動上傳';
+            console.warn('Auto-load failed:', error);
+            elements.maxCountLabel.textContent = '載入失敗，請檢查設定';
             elements.maxCountLabel.style.color = '#ef4444';
         }
     }
@@ -60,7 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.startBtn.disabled = true;
 
         try {
-            const response = await fetch(filename);
+            const path = filename.includes('/') ? filename : `questions/${filename}`;
+            const response = await fetch(path);
             if (!response.ok) throw new Error('Network response was not ok');
 
             if (filename.endsWith('.json')) {
