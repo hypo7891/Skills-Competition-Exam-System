@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         questionCountInput: document.getElementById('question-count'),
         usernameInput: document.getElementById('username'),
         maxCountLabel: document.getElementById('max-count-label'),
+        bankSelect: document.getElementById('bank-select'),
         startBtn: document.getElementById('start-btn'),
         questionText: document.getElementById('question-text'),
         optionsContainer: document.getElementById('options-container'),
@@ -46,20 +47,36 @@ document.addEventListener('DOMContentLoaded', () => {
             await loadQuestions();
         } catch (error) {
             console.warn('Auto-load failed, switching to manual mode:', error);
-            elements.maxCountLabel.textContent = '自動載入失敗';
+            elements.maxCountLabel.textContent = '自動載入失敗，請手動上傳';
             elements.maxCountLabel.style.color = '#ef4444';
-            elements.uploadContainer.classList.remove('hidden');
         }
     }
 
-    async function loadQuestions() {
-        // Fetch CSV file
-        const response = await fetch('基礎描繪組-學科題庫.csv');
-        if (!response.ok) throw new Error('Network response was not ok');
+    async function loadQuestions(filename = null) {
+        if (!filename) filename = elements.bankSelect.value;
 
-        const text = await response.text();
-        parseCSV(text);
-        updateUIWithData();
+        elements.maxCountLabel.textContent = '載入中...';
+        elements.maxCountLabel.style.color = '';
+        elements.startBtn.disabled = true;
+
+        try {
+            const response = await fetch(filename);
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            if (filename.endsWith('.json')) {
+                const data = await response.json();
+                parseJSON(data);
+            } else {
+                const text = await response.text();
+                parseCSV(text);
+            }
+            updateUIWithData();
+        } catch (error) {
+            console.error('Load failed:', error);
+            elements.maxCountLabel.textContent = '載入失敗，請嘗試手動上傳';
+            elements.maxCountLabel.style.color = '#ef4444';
+            state.allQuestions = [];
+        }
     }
 
     function handleFileUpload(event) {
@@ -68,11 +85,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            const text = e.target.result;
-            parseCSV(text);
-            updateUIWithData();
-            elements.uploadContainer.classList.add('hidden'); // Hide upload after success
-            elements.maxCountLabel.style.color = ''; // Reset color
+            const result = e.target.result;
+            if (file.name.endsWith('.json')) {
+                try {
+                    const data = JSON.parse(result);
+                    parseJSON(data);
+                    updateUIWithData();
+                    elements.maxCountLabel.style.color = '';
+                } catch (err) {
+                    alert('JSON 格式錯誤');
+                }
+            } else {
+                parseCSV(result);
+                updateUIWithData();
+                elements.maxCountLabel.style.color = '';
+            }
         };
         reader.readAsText(file);
     }
@@ -80,9 +107,34 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUIWithData() {
         if (state.allQuestions.length > 0) {
             elements.questionCountInput.max = state.allQuestions.length;
+            // Update the input value if it exceeds max
+            if (parseInt(elements.questionCountInput.value) > state.allQuestions.length) {
+                elements.questionCountInput.value = state.allQuestions.length;
+            }
             elements.maxCountLabel.textContent = `共有 ${state.allQuestions.length} 題可用`;
             elements.startBtn.disabled = false;
+        } else {
+            elements.maxCountLabel.textContent = `沒有題目`;
+            elements.startBtn.disabled = true;
         }
+    }
+
+    function parseJSON(data) {
+        // Map JSON items to internal structure
+        // JSON keys: "編號", "解答", "題目", "選項A", "選項B", "選項C", "選項D"
+        state.allQuestions = data.map(item => {
+            return {
+                id: item['編號'],
+                answer: item['解答'],
+                question: item['題目'],
+                options: {
+                    A: item['選項A'],
+                    B: item['選項B'],
+                    C: item['選項C'],
+                    D: item['選項D']
+                }
+            };
+        }).filter(item => item.id && item.question); // Basic validation
     }
 
     function parseCSV(csvText) {
@@ -131,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupEventListeners() {
+        elements.bankSelect.addEventListener('change', (e) => loadQuestions(e.target.value));
         elements.startBtn.addEventListener('click', startQuiz);
         elements.prevBtn.addEventListener('click', () => navigateQuestion(-1));
         elements.nextBtn.addEventListener('click', () => navigateQuestion(1));

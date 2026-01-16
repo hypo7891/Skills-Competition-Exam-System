@@ -38,7 +38,7 @@ body {
     height: 100%;
     z-index: -1;
     opacity: 0.5;
-    background-image: 
+    background-image:
         radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 25%),
         radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 25%);
 }
@@ -78,8 +78,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Start Screen */
@@ -116,16 +123,22 @@ body {
     color: var(--text-color);
 }
 
-.control-group input {
+.control-group input,
+.control-group select {
     padding: 12px 16px;
     border: 2px solid var(--secondary-color);
     border-radius: 12px;
     font-size: 1rem;
     outline: none;
     transition: var(--transition);
+    width: 100%;
+    /* Ensure full width */
+    background-color: white;
+    /* Ensure background is white */
 }
 
-.control-group input:focus {
+.control-group input:focus,
+.control-group select:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
@@ -133,6 +146,38 @@ body {
 .info-text {
     font-size: 0.85rem;
     color: var(--text-light);
+}
+
+.bank-selection-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.bank-selection-row select {
+    flex: 1;
+}
+
+.file-upload-wrapper {
+    position: relative;
+    display: flex;
+}
+
+.file-input-hidden {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.upload-btn {
+    padding: 12px 20px;
+    white-space: nowrap;
+    height: 100%;
+    margin: 0;
+    border-radius: 12px;
 }
 
 /* Buttons */
@@ -293,7 +338,7 @@ body {
     align-items: center;
     justify-content: center;
     margin: 20px auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 #score-display {
@@ -327,7 +372,7 @@ body {
     background: #fff;
     padding: 1.5rem;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     border-left: 4px solid var(--error-color);
 }
 
@@ -377,15 +422,15 @@ body {
         border-radius: 0;
         min-height: auto;
     }
-    
+
     .title {
         font-size: 2rem;
     }
-    
+
     .quiz-footer {
         gap: 10px;
     }
-    
+
     .btn {
         padding: 12px 20px;
     }
