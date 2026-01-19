@@ -118,6 +118,7 @@ function doGet(e) {
           count: item.count,
           q: detail.q || detail.question,
           ans: detail.ans || detail.userAns, 
+          ans_text: detail.ans_text || detail.userAnsText || "",
           correct: detail.correct || detail.answer,
           correct_text: detail.correct_text || detail.correctText || ""
         });

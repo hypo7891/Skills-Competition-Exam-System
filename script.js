@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <strong>如何解決：</strong><br>
                         請檢查您的 Google 試算表，確保欄位沒有被刪除或位移。<br>
                         正確順序應為 6 欄：<br>
-                        A:時間 | B:姓名 | C:分數 | D:摘要 | E:錯題編號 | F:詳細內容
+                    A:時間 | B:姓名 | C:分數 | D:摘要 | E:錯題編號 | F:詳細內容
                     </p>
                 </div>
             `;
@@ -335,12 +335,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         wrongItems.forEach(item => {
-            // item from backend: {id, count, q, ans, correct, correct_text}
+            // item from backend: {id, count, q, ans, ans_text, correct, correct_text}
 
             const el = document.createElement('div');
             el.className = 'review-item';
 
-            // Show correct answer option + text
+            // Show answers with text
+            const userDisplay = item.ans_text ? `${item.ans} (${item.ans_text})` : item.ans;
             const correctDisplay = item.correct_text ? `${item.correct} (${item.correct_text})` : item.correct;
 
             el.innerHTML = `
@@ -348,8 +349,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span style="display:inline-block; min-width: 40px; font-weight:800; color:var(--primary-color);">#${item.id}</span>
                     <span style="font-weight: 500;">${item.q}</span>
                  </div>
-                 <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div class="review-answer correct-answer" style="margin-bottom:0;">正確答案：${correctDisplay}</div>
+                 <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+                    <div class="review-answer user-answer" style="margin-bottom:0; color: #ef4444;">您的答案：${userDisplay}</div>
+                    <div class="review-answer correct-answer" style="margin-bottom:0; color: #10b981;">正確答案：${correctDisplay}</div>
+                 </div>
+                 <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
                     <div style="background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
                         錯題次數：${item.count}
                     </div>
@@ -459,6 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: w.question.id,
                     q: w.question.question,
                     ans: w.userAns,
+                    ans_text: w.question.options[w.userAns] || '未作答',
                     correct: w.question.answer,
                     correct_text: w.question.options[w.question.answer]
                 })))
