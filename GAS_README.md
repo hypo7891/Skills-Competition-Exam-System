@@ -144,20 +144,20 @@ function doPost(e) {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     
     // 準備要寫入的資料列 
-    // 順序：時間(Client端), 姓名, 分數, 答對題數, 錯題編號, 詳細內容
+    // 嚴格順序：A=時間, B=姓名, C=分數, D=摘要, E=錯題編號(純ID), F=詳細內容(JSON)
     var rowData = [
       data.time || new Date(), // A欄: 時間
       data.name,               // B欄: 姓名
       data.score,              // C欄: 分數
       data.summary,            // D欄: 答對題數 summary
-      data.wrong_ids,          // E欄: 錯題編號 (New)
-      data.detail              // F欄: 詳細 (JSON string or text)
+      data.wrong_ids,          // E欄: 錯題編號 (例如: "1, 5, 10")
+      data.detail              // F欄: 詳細 (JSON字串)
     ];
     
     // 寫入試算表
     sheet.appendRow(rowData);
     
-    // 回傳成功訊息
+    // *重要*：確保回傳成功，並強制 Content-Type 為 JSON
     return ContentService.createTextOutput(JSON.stringify({"result": "success"}))
       .setMimeType(ContentService.MimeType.JSON);
       

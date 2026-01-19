@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Configuration
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNAqWSfLTsYKbvQ_KTJ-3r_SNXmux5S8jB3Hi4dxMmjiKPIUQ-qEieLIEpCkRnpijo/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlN_vhyyNfmRHLtMsjrFs-caYDjOl0N3zgnY7RzbayYTehDEYIpH_vcNcmj9J7Zd6a/exec";
 
     // Initialize
     init();
