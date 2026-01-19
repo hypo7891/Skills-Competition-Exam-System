@@ -337,21 +337,35 @@ document.addEventListener('DOMContentLoaded', () => {
         wrongItems.forEach(item => {
             // item from backend: {id, count, q, ans, ans_text, correct, correct_text}
 
+            // Fallback: If text is missing (old records), try to find it in currently loaded questions
+            let qText = item.q;
+            let cText = item.correct_text;
+            let aText = item.ans_text;
+
+            if (!cText || !qText) {
+                const found = state.allQuestions.find(q => String(q.id) === String(item.id));
+                if (found) {
+                    qText = found.question;
+                    cText = found.options[item.correct];
+                    aText = found.options[item.ans];
+                }
+            }
+
             const el = document.createElement('div');
             el.className = 'review-item';
 
-            // Show answers with text
-            const userDisplay = item.ans_text ? `${item.ans} (${item.ans_text})` : item.ans;
-            const correctDisplay = item.correct_text ? `${item.correct} (${item.correct_text})` : item.correct;
+            // Requested Format: 正確答案: B "選項內容"
+            const correctDisplay = cText ? `${item.correct}  "${cText}"` : item.correct;
+            const userDisplay = aText ? `${item.ans}  "${aText}"` : item.ans;
 
             el.innerHTML = `
                  <div class="review-question">
                     <span style="display:inline-block; min-width: 40px; font-weight:800; color:var(--primary-color);">#${item.id}</span>
-                    <span style="font-weight: 500;">${item.q}</span>
+                    <span style="font-weight: 500;">${qText}</span>
                  </div>
-                 <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
-                    <div class="review-answer user-answer" style="margin-bottom:0; color: #ef4444;">您的答案：${userDisplay}</div>
-                    <div class="review-answer correct-answer" style="margin-bottom:0; color: #10b981;">正確答案：${correctDisplay}</div>
+                 <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+                    <div class="review-answer user-answer" style="margin-bottom:0; color: #ef4444; font-weight: 500;">您的答案 : ${userDisplay}</div>
+                    <div class="review-answer correct-answer" style="margin-bottom:0; color: #10b981; font-weight: 600;">正確答案 : ${correctDisplay}</div>
                  </div>
                  <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
                     <div style="background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
