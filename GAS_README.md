@@ -50,25 +50,45 @@ function doGet(e) {
       var safeRowName = String(rowName).trim();
       
       if (safeRowName === name) {
-        // 從 E 欄 (indices 4) 取得 ID 列表
-        var wrongIdsRaw = row[4]; 
-        var wrongIds = [];
-        if (typeof wrongIdsRaw === 'string') {
-           wrongIds = wrongIdsRaw.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ""; });
-        } else if (typeof wrongIdsRaw === 'number') {
-           wrongIds = [wrongIdsRaw.toString()];
-        }
+        var cellE = row[4]; // E欄
+        var cellF = row[5]; // F欄
         
-        // 從 F 欄 (indices 5) 取得詳細內容
+        var wrongIds = [];
         var detailMap = {};
-        var detailJson = row[5];
-        if (detailJson) {
-           try {
-             var details = JSON.parse(detailJson);
-             details.forEach(function(item) {
-               detailMap[item.id] = item;
-             });
-           } catch (e) { /* ignore */ }
+        
+        // 判斷 E 欄是否直接存放了 JSON 詳細資料 (處理欄位位移的情況)
+        var isColumnEShiftedJSON = false;
+        try {
+          if (typeof cellE === 'string' && cellE.trim().charAt(0) === '[') {
+             var parsed = JSON.parse(cellE);
+             if (Array.isArray(parsed)) {
+               isColumnEShiftedJSON = true;
+               parsed.forEach(function(item) {
+                 wrongIds.push(item.id);
+                 detailMap[item.id] = item;
+               });
+             }
+          }
+        } catch (e) { /* Not JSON, fallback to standard handling */ }
+        
+        if (!isColumnEShiftedJSON) {
+           // 標準格式：E欄是ID列表，F欄是JSON詳細資料
+           if (typeof cellE === 'string') {
+              wrongIds = cellE.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ""; });
+           } else if (typeof cellE === 'number') {
+              wrongIds = [cellE.toString()];
+           }
+           
+           if (cellF) {
+              try {
+                var details = JSON.parse(cellF);
+                 if (Array.isArray(details)) {
+                   details.forEach(function(item) {
+                     detailMap[item.id] = item;
+                   });
+                 }
+              } catch (e) { /* ignore */ }
+           }
         }
 
         // 更新統計
