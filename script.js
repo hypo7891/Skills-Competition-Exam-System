@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Load VIP List
             try {
-                const vipResponse = await fetch('vip_list.json');
+                const vipResponse = await fetch(`vip_list.json?t=${Date.now()}`);
                 if (vipResponse.ok) {
                     state.vipList = await vipResponse.json();
                 } else {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Load manifest
-            const manifestResponse = await fetch('questions/manifest.json');
+            const manifestResponse = await fetch(`questions/manifest.json?t=${Date.now()}`);
             if (!manifestResponse.ok) throw new Error('Failed to load manifest');
             const manifest = await manifestResponse.json();
 
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const path = filename.includes('/') ? filename : `questions/${filename}`;
-            const response = await fetch(path);
+            const response = await fetch(`${path}?t=${Date.now()}`);
             if (!response.ok) throw new Error('Network response was not ok');
 
             if (filename.endsWith('.json')) {
