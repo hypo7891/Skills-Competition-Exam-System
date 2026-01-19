@@ -110,13 +110,16 @@ function doGet(e) {
     for (var id in stats) {
       if (stats.hasOwnProperty(id)) {
         var item = stats[id];
-        var detail = item.detail || { id: id, q: "題目資料缺失", ans: "?", correct: "?" };
+        // 取得詳細資料，若無則提供預設值
+        var detail = item.detail || { id: id, q: "題目資料缺失", ans: "?", correct: "?", correct_text: "" };
+        
         resultList.push({
           id: id,
           count: item.count,
           q: detail.q || detail.question,
           ans: detail.ans || detail.userAns, 
-          correct: detail.correct || detail.answer
+          correct: detail.correct || detail.answer,
+          correct_text: detail.correct_text || detail.correctText || ""
         });
       }
     }

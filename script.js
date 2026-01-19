@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Configuration
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlN_vhyyNfmRHLtMsjrFs-caYDjOl0N3zgnY7RzbayYTehDEYIpH_vcNcmj9J7Zd6a/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxrwSVbUJ8pLbSulKhCNIeDlus3Qdw19Ot3RIZMTjSSPZcfVOOiFxkYK2GHDGdSk7Y/exec";
 
     // Initialize
     init();
@@ -335,20 +335,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         wrongItems.forEach(item => {
-            // item from backend: {id, count, q, ans, correct}
+            // item from backend: {id, count, q, ans, correct, correct_text}
 
             const el = document.createElement('div');
             el.className = 'review-item';
 
-            // Requested format: 編號、題目、答案、錯題次數
-            // We'll organize it cleanly.
+            // Show correct answer option + text
+            const correctDisplay = item.correct_text ? `${item.correct} (${item.correct_text})` : item.correct;
+
             el.innerHTML = `
                  <div class="review-question">
                     <span style="display:inline-block; min-width: 40px; font-weight:800; color:var(--primary-color);">#${item.id}</span>
                     <span style="font-weight: 500;">${item.q}</span>
                  </div>
                  <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div class="review-answer correct-answer" style="margin-bottom:0;">答案：${item.correct}</div>
+                    <div class="review-answer correct-answer" style="margin-bottom:0;">正確答案：${correctDisplay}</div>
                     <div style="background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
                         錯題次數：${item.count}
                     </div>
@@ -458,7 +459,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: w.question.id,
                     q: w.question.question,
                     ans: w.userAns,
-                    correct: w.question.answer
+                    correct: w.question.answer,
+                    correct_text: w.question.options[w.question.answer]
                 })))
             });
         }
