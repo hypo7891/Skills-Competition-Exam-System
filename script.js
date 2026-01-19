@@ -313,6 +313,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Check for data corruption (e.g. if ID looks like JSON)
+        const isCorrupted = wrongItems.some(item =>
+            item.id && (item.id.includes('{') || item.id.includes(':') || item.id.includes('"'))
+        );
+
+        if (isCorrupted) {
+            elements.historyList.innerHTML = `
+                <div style="text-align:center; padding: 2rem; color: #ef4444; border: 2px dashed #ef4444; border-radius: 8px; background: #fff1f2;">
+                    <h3>⚠️ 資料格式錯誤</h3>
+                    <p>讀取到的錯題資料格式不正確，這通常是因為 Google 試算表的欄位順序錯誤導致。</p>
+                    <p style="margin-top:10px; font-size: 0.9em; color: #374151;">
+                        <strong>如何解決：</strong><br>
+                        請檢查您的 Google 試算表，確保欄位沒有被刪除或位移。<br>
+                        正確順序應為 6 欄：<br>
+                        A:時間 | B:姓名 | C:分數 | D:摘要 | E:錯題編號 | F:詳細內容
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
         wrongItems.forEach(item => {
             // item from backend: {id, count, q, ans, correct}
 
