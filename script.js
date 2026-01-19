@@ -303,7 +303,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // VIP Access Control
-        if (!state.vipList.includes(name)) {
+        console.log('Current VIP List:', state.vipList);
+        console.log('Checking name:', name);
+
+        const isVip = state.vipList.some(v =>
+            String(v).trim().toLowerCase() === name.toLowerCase()
+        );
+
+        if (!isVip) {
+            console.warn('Access denied for:', name);
             alert('您不能使用本功能，請洽管理者');
             return;
         }
@@ -504,7 +512,11 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.resultSummary.textContent = `答對 ${score} / ${total} 題`;
 
         // VIP Logging
-        if (state.vipList.includes(state.userName)) {
+        const isVipRecord = state.vipList.some(v =>
+            String(v).trim().toLowerCase() === state.userName.toLowerCase()
+        );
+
+        if (isVipRecord) {
             const wrongIds = wrongAnswers.map(w => w.question.id).join(', ');
             const currentDateTime = new Date().toLocaleString('zh-TW', { hour12: false });
 
