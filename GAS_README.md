@@ -36,33 +36,34 @@ function doGet(e) {
     }
     
     // 取得所有資料
-    // 範圍：A2 到 F最後一列
-    var data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
+    // 範圍：A2 到 G最後一列 (變更為 7 欄)
+    var data = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
     
     // 統計錯題頻率與內容
-    var stats = {}; // { "id": { count: 0, detail: object } }
+    var stats = {}; // { "id_bank": { count: 0, detail: object } }
     
     for (var i = 0; i < data.length; i++) {
       var row = data[i];
       var rowName = row[1]; // B欄: 姓名
+      var currentBank = String(row[3]).trim(); // D欄: 題庫類型
       
       // 確保試算表中的名字也轉為字串並去除空白
       var safeRowName = String(rowName).trim();
       
       if (safeRowName === name) {
-        var cellE = row[4]; // E欄
-        var cellF = row[5]; // F欄
+        var cellF = row[5]; // F欄: 錯題編號 (原 E 欄)
+        var cellG = row[6]; // G欄: 詳細內容 (原 F 欄)
         
         var wrongIds = [];
         var detailMap = {};
         
-        // 判斷 E 欄是否直接存放了 JSON 詳細資料 (處理欄位位移的情況)
-        var isColumnEShiftedJSON = false;
+        // 支援 JSON 在 F 欄的情況 (防呆，處理欄位位移的情況)
+        var isColumnFShiftedJSON = false;
         try {
-          if (typeof cellE === 'string' && cellE.trim().charAt(0) === '[') {
-             var parsed = JSON.parse(cellE);
+          if (typeof cellF === 'string' && cellF.trim().charAt(0) === '[') {
+             var parsed = JSON.parse(cellF);
              if (Array.isArray(parsed)) {
-               isColumnEShiftedJSON = true;
+               isColumnFShiftedJSON = true;
                parsed.forEach(function(item) {
                  wrongIds.push(item.id);
                  detailMap[item.id] = item;
@@ -71,17 +72,17 @@ function doGet(e) {
           }
         } catch (e) { /* Not JSON, fallback to standard handling */ }
         
-        if (!isColumnEShiftedJSON) {
-           // 標準格式：E欄是ID列表，F欄是JSON詳細資料
-           if (typeof cellE === 'string') {
-              wrongIds = cellE.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ""; });
-           } else if (typeof cellE === 'number') {
-              wrongIds = [cellE.toString()];
+        if (!isColumnFShiftedJSON) {
+           // 標準格式：F欄是ID列表，G欄是JSON詳細資料
+           if (typeof cellF === 'string') {
+              wrongIds = cellF.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ""; });
+           } else if (typeof cellF === 'number') {
+              wrongIds = [cellF.toString()];
            }
            
-           if (cellF) {
+           if (cellG) {
               try {
-                var details = JSON.parse(cellF);
+                var details = JSON.parse(cellG);
                  if (Array.isArray(details)) {
                    details.forEach(function(item) {
                      detailMap[item.id] = item;
@@ -91,15 +92,16 @@ function doGet(e) {
            }
         }
 
-        // 更新統計
         wrongIds.forEach(function(id) {
-           if (!stats[id]) {
-             stats[id] = { count: 0, detail: null };
+           // 複合鍵：id + 題庫，確保不同題庫的同 ID 不會混淆
+           var key = id + "_" + currentBank;
+           if (!stats[key]) {
+             stats[key] = { count: 0, detail: null, bank: currentBank, id: id };
            }
-           stats[id].count++;
+           stats[key].count++;
            
-           if (!stats[id].detail && detailMap[id]) {
-             stats[id].detail = detailMap[id];
+           if (!stats[key].detail && detailMap[id]) {
+             stats[key].detail = detailMap[id];
            }
         });
       }
@@ -107,14 +109,15 @@ function doGet(e) {
     
     // 轉為陣列
     var resultList = [];
-    for (var id in stats) {
-      if (stats.hasOwnProperty(id)) {
-        var item = stats[id];
+    for (var key in stats) {
+      if (stats.hasOwnProperty(key)) {
+        var item = stats[key];
         // 取得詳細資料，若無則提供預設值
-        var detail = item.detail || { id: id, q: "題目資料缺失", ans: "?", correct: "?", correct_text: "" };
+        var detail = item.detail || { id: item.id, q: "題目資料缺失", ans: "?", correct: "?", correct_text: "", ans_text: "" };
         
         resultList.push({
-          id: id,
+          id: item.id,
+          bank_type: item.bank,
           count: item.count,
           q: detail.q || detail.question,
           ans: detail.ans || detail.userAns, 
@@ -148,14 +151,15 @@ function doPost(e) {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     
     // 準備要寫入的資料列 
-    // 嚴格順序：A=時間, B=姓名, C=分數, D=摘要, E=錯題編號(純ID), F=詳細內容(JSON)
+    // 建議順序：A時間, B姓名, C分數, D題庫類型, E摘要, F錯題編號, G詳細內容
     var rowData = [
       data.time || new Date(), // A欄: 時間
       data.name,               // B欄: 姓名
       data.score,              // C欄: 分數
-      data.summary,            // D欄: 答對題數 summary
-      data.wrong_ids,          // E欄: 錯題編號 (例如: "1, 5, 10")
-      data.detail              // F欄: 詳細 (JSON字串)
+      data.bank_type,          // D欄: 題庫類型 (新增)
+      data.summary,            // E欄: 摘要 (原 D 欄)
+      data.wrong_ids,          // F欄: 錯題編號 (原 E 欄)
+      data.detail              // G欄: 詳細內容 (原 F 欄)
     ];
     
     // 寫入試算表

@@ -10,7 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
         timeElapsed: 0,
         timeElapsed: 0,
         userName: '',
-        vipList: []
+        vipList: [],
+        currentBankName: '', // Track current bank display name
+        rawHistoryData: []  // Cache for filtering
     };
 
     // DOM Elements
@@ -43,11 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
         historyBackBtn: document.getElementById('history-back-btn'),
         historyList: document.getElementById('history-list'),
         historyLoading: document.getElementById('history-loading'),
-        historyContent: document.getElementById('history-content')
+        historyContent: document.getElementById('history-content'),
+        historyBankFilter: document.getElementById('history-bank-filter'),
+        historyFilterContainer: document.getElementById('history-filter-container')
     };
 
     // Configuration
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxrwSVbUJ8pLbSulKhCNIeDlus3Qdw19Ot3RIZMTjSSPZcfVOOiFxkYK2GHDGdSk7Y/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWOIWxhVQu88jjHVBggCFi6wV1MBvVYnr8sJ45RHOsczRIvpFzoQ-xho_0915VWRwc/exec";
 
     // Initialize
     init();
@@ -108,9 +112,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (filename.endsWith('.json')) {
                 const data = await response.json();
                 parseJSON(data);
+                // Set bank name from display text
+                const options = Array.from(elements.bankSelect.options);
+                const selectedOption = options.find(o => o.value === filename);
+                state.currentBankName = selectedOption ? selectedOption.textContent : filename.replace('.json', '');
             } else {
                 const text = await response.text();
                 parseCSV(text);
+                state.currentBankName = '手動上傳';
             }
             updateUIWithData();
         } catch (error) {
@@ -234,6 +243,15 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.submitBtn.addEventListener('click', submitQuiz);
         elements.restartBtn.addEventListener('click', resetQuiz);
         elements.downloadBtn.addEventListener('click', downloadReport);
+        elements.historyBankFilter.addEventListener('change', (e) => {
+            const filterValue = e.target.value;
+            if (filterValue === 'all') {
+                renderHistory(state.rawHistoryData);
+            } else {
+                const filtered = state.rawHistoryData.filter(item => item.bank_type === filterValue);
+                renderHistory(filtered);
+            }
+        });
         if (elements.csvUpload) {
             elements.csvUpload.addEventListener('change', handleFileUpload);
         }
@@ -284,9 +302,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // VIP Access Control
+        if (!state.vipList.includes(name)) {
+            alert('您不能使用本功能，請洽管理者');
+            return;
+        }
+
         switchScreen('history-screen');
         elements.historyLoading.style.display = 'block';
         elements.historyContent.style.display = 'none';
+        elements.historyFilterContainer.style.display = 'none';
         elements.historyList.innerHTML = '';
 
         try {
@@ -294,6 +319,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}`);
             if (!response.ok) throw new Error('Network error');
             const data = await response.json();
+
+            state.rawHistoryData = data; // Cache data
+
+            // Populate Filter Dropdown
+            const banks = [...new Set(data.map(item => item.bank_type).filter(b => b))];
+            elements.historyBankFilter.innerHTML = '<option value="all">全部記錄</option>';
+            banks.forEach(bank => {
+                const opt = document.createElement('option');
+                opt.value = bank;
+                opt.textContent = bank;
+                elements.historyBankFilter.appendChild(opt);
+            });
+
+            if (banks.length > 0) {
+                elements.historyFilterContainer.style.display = 'block';
+            }
 
             renderHistory(data);
         } catch (error) {
@@ -472,6 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 name: state.userName,
                 score: finalScore,
                 summary: `答對 ${score} / ${total} 題`,
+                bank_type: state.currentBankName, // New field for bank categorization
                 wrong_ids: wrongIds,
                 detail: JSON.stringify(wrongAnswers.map(w => ({
                     id: w.question.id,
