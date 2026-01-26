@@ -91,9 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 await loadQuestions(manifest[0]);
             }
         } catch (error) {
-            console.warn('Auto-load failed:', error);
-            elements.maxCountLabel.textContent = '載入失敗，請檢查設定';
-            elements.maxCountLabel.style.color = '#ef4444';
+            console.warn('Auto-load manifest failed, using hardcoded options:', error);
+            // Fallback: load the first hardcoded option if available
+            if (elements.bankSelect.options.length > 0) {
+                await loadQuestions(elements.bankSelect.value);
+            } else {
+                elements.maxCountLabel.textContent = '載入失敗，請檢查設定';
+                elements.maxCountLabel.style.color = '#ef4444';
+            }
         }
     }
 
