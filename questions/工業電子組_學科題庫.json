@@ -22,7 +22,7 @@
     {
         "編號": "3",
         "解答": "B",
-        "題目": "如圖所示電路，<img src=\"questions/image/image001.png\" alt=\"image001\">的電壓降應為<img src=\"questions/image/image002.gif\" alt=\"image002\">",
+        "題目": "如圖所示電路，<img src=\"questions/image/image003.png\" alt=\"image1\">的電壓降應為<img src=\"questions/image/image003.png\" alt=\"image2\">",
         "選項A": "9V",
         "選項B": "6V",
         "選項C": "3V",
@@ -32,7 +32,7 @@
     {
         "編號": "4",
         "解答": "A",
-        "題目": "如圖所示電路，總電阻<img src=\"questions/image/image003.png\" alt=\"image003\">應為<img src=\"questions/image/image004.gif\" alt=\"image004\">",
+        "題目": "如圖所示電路，總電阻<img src=\"questions/image/image007.png\" alt=\"image3\">應為<img src=\"questions/image/image007.png\" alt=\"image4\">",
         "選項A": "1Ω",
         "選項B": "1.5Ω",
         "選項C": "2Ω",
@@ -135,8 +135,8 @@
         "題目": "一正回授電路欲使其產生正弦波振盪時，則環路增益(Loop Gain)應大約等於",
         "選項A": "0",
         "選項B": "1",
-        "選項C": "<img src=\"questions/image/image005.png\" alt=\"image005\">",
-        "選項D": "<img src=\"questions/image/image006.gif\" alt=\"image006\">",
+        "選項C": "<img src=\"questions/image/image009.png\" alt=\"image5\">",
+        "選項D": "<img src=\"questions/image/image011.png\" alt=\"image6\">",
         "詳解": ""
     },
     {
@@ -316,7 +316,7 @@
         "選項A": "第一",
         "選項B": "第二",
         "選項C": "第三",
-        "選項D": "第四。 <img src=\"questions/image/image007.png\" alt=\"image007\">",
+        "選項D": "第四。 <img src=\"questions/image/image013.png\" alt=\"image7\">",
         "詳解": ""
     },
     {
@@ -363,16 +363,16 @@
         "編號": "37",
         "解答": "C",
         "題目": "下列何者為電動機的符號",
-        "選項A": "<img src=\"questions/image/image008.gif\" alt=\"image008\">",
-        "選項B": "<img src=\"questions/image/image009.png\" alt=\"image009\">",
-        "選項C": "<img src=\"questions/image/image010.gif\" alt=\"image010\">",
-        "選項D": "<img src=\"questions/image/image011.png\" alt=\"image011\">。",
+        "選項A": "<img src=\"questions/image/image015.png\" alt=\"image8\">",
+        "選項B": "<img src=\"questions/image/image017.png\" alt=\"image9\">",
+        "選項C": "<img src=\"questions/image/image019.png\" alt=\"image10\">",
+        "選項D": "<img src=\"questions/image/image021.png\" alt=\"image11\">。",
         "詳解": ""
     },
     {
         "編號": "38",
         "解答": "D",
-        "題目": "右圖符號<img src=\"questions/image/image012.gif\" alt=\"image012\">為",
+        "題目": "右圖符號<img src=\"questions/image/image023.png\" alt=\"image12\">為",
         "選項A": "二極體",
         "選項B": "電容器",
         "選項C": "石英晶體",
@@ -383,16 +383,16 @@
         "編號": "39",
         "解答": "B",
         "題目": "下列何者為發光二極體的符號",
-        "選項A": "<img src=\"questions/image/image013.png\" alt=\"image013\">",
-        "選項B": "<img src=\"questions/image/image014.gif\" alt=\"image014\">",
-        "選項C": "<img src=\"questions/image/image015.png\" alt=\"image015\">",
-        "選項D": "<img src=\"questions/image/image016.gif\" alt=\"image016\">。",
+        "選項A": "<img src=\"questions/image/image025.png\" alt=\"image13\">",
+        "選項B": "<img src=\"questions/image/image027.png\" alt=\"image14\">",
+        "選項C": "<img src=\"questions/image/image029.png\" alt=\"image15\">",
+        "選項D": "<img src=\"questions/image/image031.png\" alt=\"image16\">。",
         "詳解": ""
     },
     {
         "編號": "40",
         "解答": "A",
-        "題目": "右圖符號<img src=\"questions/image/image017.png\" alt=\"image017\">為",
+        "題目": "右圖符號<img src=\"questions/image/image033.png\" alt=\"image17\">為",
         "選項A": "稽納二極體",
         "選項B": "整流二極體",
         "選項C": "通道二極體",
@@ -402,7 +402,7 @@
     {
         "編號": "41",
         "解答": "D",
-        "題目": "右圖符號<img src=\"questions/image/image018.gif\" alt=\"image018\">為",
+        "題目": "右圖符號<img src=\"questions/image/image035.png\" alt=\"image18\">為",
         "選項A": "變壓器",
         "選項B": "單刀雙擲開關",
         "選項C": "電感器",
@@ -412,7 +412,7 @@
     {
         "編號": "42",
         "解答": "C",
-        "題目": "右圖符號<img src=\"questions/image/image019.png\" alt=\"image019\">為",
+        "題目": "右圖符號![](media/image82.jpeg){width=\"1.5833333333333333in\" height=\"0.7083333333333334in\"}為",
         "選項A": "橋式整流器",
         "選項B": "發光二極體",
         "選項C": "光耦合器",
@@ -422,7 +422,7 @@
     {
         "編號": "43",
         "解答": "B",
-        "題目": "右圖符號<img src=\"questions/image/image020.gif\" alt=\"image020\">為",
+        "題目": "右圖符號<img src=\"questions/image/image039.png\" alt=\"image20\">為",
         "選項A": "單極單投 (SPST)",
         "選項B": "單極雙投 (SPDT)",
         "選項C": "雙極單投 (DPST)",
@@ -432,7 +432,7 @@
     {
         "編號": "44",
         "解答": "A",
-        "題目": "右圖符號<img src=\"questions/image/image021.png\" alt=\"image021\">為",
+        "題目": "右圖符號<img src=\"questions/image/image041.png\" alt=\"image21\">為",
         "選項A": "微動開關",
         "選項B": "限時動作接點",
         "選項C": "限時復歸接點",
@@ -452,7 +452,7 @@
     {
         "編號": "46",
         "解答": "C",
-        "題目": "下圖符號<img src=\"questions/image/image022.gif\" alt=\"image022\">為",
+        "題目": "下圖符號<img src=\"questions/image/image043.png\" alt=\"image22\">為",
         "選項A": "UJT",
         "選項B": "SCR",
         "選項C": "PUT",
@@ -462,7 +462,7 @@
     {
         "編號": "47",
         "解答": "C",
-        "題目": "右圖圖符號<img src=\"questions/image/image023.png\" alt=\"image023\">為",
+        "題目": "右圖圖符號<img src=\"questions/image/image045.png\" alt=\"image23\">為",
         "選項A": "矽控整流器",
         "選項B": "受光二極體",
         "選項C": "光閘流體",
@@ -472,7 +472,7 @@
     {
         "編號": "48",
         "解答": "D",
-        "題目": "右圖所標示<img src=\"questions/image/image024.gif\" alt=\"image024\">之\"8＂為",
+        "題目": "右圖所標示<img src=\"questions/image/image047.png\" alt=\"image24\">之\"8＂為",
         "選項A": "8公分",
         "選項B": "8英吋",
         "選項C": "8倍尺寸",
@@ -482,7 +482,7 @@
     {
         "編號": "49",
         "解答": "A",
-        "題目": "右圖所示<img src=\"questions/image/image025.png\" alt=\"image025\">之E訊號為",
+        "題目": "右圖所示<img src=\"questions/image/image049.png\" alt=\"image25\">之E訊號為",
         "選項A": "低電位致能",
         "選項B": "反向輸出",
         "選項C": "浮接點",
@@ -493,16 +493,16 @@
         "編號": "50",
         "解答": "D",
         "題目": "在數位邏輯中，反或閘的符號為",
-        "選項A": "<img src=\"questions/image/image026.gif\" alt=\"image026\">",
-        "選項B": "<img src=\"questions/image/image027.png\" alt=\"image027\">",
-        "選項C": "<img src=\"questions/image/image028.gif\" alt=\"image028\">",
-        "選項D": "<img src=\"questions/image/image029.png\" alt=\"image029\">。",
+        "選項A": "![](media/image51.jpeg){width=\"0.975in\" height=\"0.2833333333333333in\"}",
+        "選項B": "![](media/image53.jpeg){width=\"1.0416666666666667in\" height=\"0.2833333333333333in\"}",
+        "選項C": "![](media/image55.jpeg){width=\"0.975in\" height=\"0.2833333333333333in\"}",
+        "選項D": "![](media/image57.jpeg){width=\"1.0in\" height=\"0.2916666666666667in\"}。",
         "詳解": ""
     },
     {
         "編號": "51",
         "解答": "B",
-        "題目": "下圖符號<img src=\"questions/image/image030.gif\" alt=\"image030\">為",
+        "題目": "下圖符號<img src=\"questions/image/image059.png\" alt=\"image30\">為",
         "選項A": "A型排阻",
         "選項B": "B型排阻",
         "選項C": "C型排阻",
@@ -512,7 +512,7 @@
     {
         "編號": "52",
         "解答": "B",
-        "題目": "右圖<img src=\"questions/image/image031.png\" alt=\"image031\">DIP IC頂視圖，第一支接腳位置在",
+        "題目": "右圖<img src=\"questions/image/image061.png\" alt=\"image31\">DIP IC頂視圖，第一支接腳位置在",
         "選項A": "A腳",
         "選項B": "B腳",
         "選項C": "C腳",
@@ -522,7 +522,7 @@
     {
         "編號": "53",
         "解答": "B",
-        "題目": "下圖符號<img src=\"questions/image/image032.gif\" alt=\"image032\">為",
+        "題目": "下圖符號<img src=\"questions/image/image063.png\" alt=\"image32\">為",
         "選項A": "AND GATE",
         "選項B": "NOT GATE",
         "選項C": "OR GATE",
@@ -543,10 +543,10 @@
         "編號": "55",
         "解答": "D",
         "題目": "電機電子工程學會簡稱為",
-        "選項A": "<img src=\"questions/image/image033.png\" alt=\"image033\">",
-        "選項B": "<img src=\"questions/image/image034.gif\" alt=\"image034\">",
+        "選項A": "<img src=\"questions/image/image065.png\" alt=\"image33\">",
+        "選項B": "![](media/image67.jpeg){width=\"0.2833333333333333in\" height=\"0.2833333333333333in\"}",
         "選項C": "BS",
-        "選項D": "<img src=\"questions/image/image035.png\" alt=\"image035\">。",
+        "選項D": "![](media/image69.jpeg){width=\"0.5333333333333333in\" height=\"0.2in\"}。",
         "詳解": ""
     },
     {
@@ -572,7 +572,7 @@
     {
         "編號": "58",
         "解答": "B",
-        "題目": "右圖<img src=\"questions/image/image036.gif\" alt=\"image036\">符號為",
+        "題目": "右圖<img src=\"questions/image/image072.gif\" alt=\"image36\">符號為",
         "選項A": "電鈴",
         "選項B": "蜂鳴器",
         "選項C": "指示燈",
@@ -1313,10 +1313,10 @@
         "編號": "132",
         "解答": "A",
         "題目": "以IC腳焊接為例，下列各焊點何者最佳：",
-        "選項A": "<img src=\"questions/image/image037.jpg\" alt=\"image037\">",
-        "選項B": "<img src=\"questions/image/image038.jpg\" alt=\"image038\">",
-        "選項C": "<img src=\"questions/image/image039.png\" alt=\"image039\">",
-        "選項D": "<img src=\"questions/image/image040.gif\" alt=\"image040\">。",
+        "選項A": "![](media/image74.jpeg){width=\"1.0166666666666666in\" height=\"0.5583333333333333in\"}",
+        "選項B": "![](media/image76.jpeg){width=\"1.0416666666666667in\" height=\"0.5583333333333333in\"}",
+        "選項C": "![](media/image78.jpeg){width=\"1.0666666666666667in\" height=\"0.5583333333333333in\"}",
+        "選項D": "![](media/image80.jpeg){width=\"1.0583333333333333in\" height=\"0.5583333333333333in\"}。",
         "詳解": ""
     },
     {
