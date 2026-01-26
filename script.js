@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         錯題次數：${item.count}
                     </div>
                  </div>
-             `;
+            `;
             elements.historyList.appendChild(el);
         });
     }
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update Info
         elements.questionNumber.textContent = `Question ${state.currentIndex + 1}/${total}`;
         elements.progressBar.style.width = `${((state.currentIndex + 1) / total) * 100}%`;
-        elements.questionText.textContent = currentQ.question;
+        elements.questionText.innerHTML = currentQ.question;
 
         // Generate Options
         elements.optionsContainer.innerHTML = '';
