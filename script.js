@@ -15,6 +15,22 @@ document.addEventListener('DOMContentLoaded', () => {
         rawHistoryData: []  // Cache for filtering
     };
 
+    /**
+     * Helper to convert Markdown image syntax to HTML <img> tags.
+     * Handles: ![](media/image82.jpeg){width="..."}
+     */
+    function parseMarkdownImages(text) {
+        if (!text || typeof text !== 'string') return text;
+
+        // Match Markdown ![]() followed by optional {...}
+        return text.replace(/!\[\]\(media\/image(\d+)\.(jpe?g|png|gif)\)({.*?})?/g, (match, num, ext) => {
+            const paddedNum = num.padStart(3, '0');
+            // Standardize extension and path
+            const finalExt = ext === 'jpeg' ? 'jpg' : ext;
+            return `<img src="questions/image/image${paddedNum}.${finalExt}" alt="image">`;
+        });
+    }
+
     // DOM Elements
     const elements = {
         startScreen: document.getElementById('start-screen'),
@@ -415,11 +431,11 @@ document.addEventListener('DOMContentLoaded', () => {
             el.innerHTML = `
                  <div class="review-question">
                     <span style="display:inline-block; min-width: 40px; font-weight:800; color:var(--primary-color);">#${item.id}</span>
-                    <span style="font-weight: 500;">${qText}</span>
+                    <span style="font-weight: 500;">${parseMarkdownImages(qText)}</span>
                  </div>
                  <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
-                    <div class="review-answer user-answer" style="margin-bottom:0; color: #ef4444; font-weight: 500;">您的答案 : ${userDisplay}</div>
-                    <div class="review-answer correct-answer" style="margin-bottom:0; color: #10b981; font-weight: 600;">正確答案 : ${correctDisplay}</div>
+                    <div class="review-answer user-answer" style="margin-bottom:0; color: #ef4444; font-weight: 500;">您的答案 : ${parseMarkdownImages(userDisplay)}</div>
+                    <div class="review-answer correct-answer" style="margin-bottom:0; color: #10b981; font-weight: 600;">正確答案 : ${parseMarkdownImages(correctDisplay)}</div>
                  </div>
                  <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
                     <div style="background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
@@ -438,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update Info
         elements.questionNumber.textContent = `Question ${state.currentIndex + 1}/${total}`;
         elements.progressBar.style.width = `${((state.currentIndex + 1) / total) * 100}%`;
-        elements.questionText.innerHTML = currentQ.question;
+        elements.questionText.innerHTML = parseMarkdownImages(currentQ.question);
 
         // Generate Options
         elements.optionsContainer.innerHTML = '';
@@ -453,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = `
                 <div class="option-marker">${key}</div>
-                <div class="option-text">${optionText}</div>
+                <div class="option-text">${parseMarkdownImages(optionText)}</div>
             `;
             elements.optionsContainer.appendChild(card);
         });
@@ -552,9 +568,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.createElement('div');
                 el.className = 'review-item';
                 el.innerHTML = `
-                    <div class="review-question">${item.question.id}. ${item.question.question}</div>
-                    <div class="review-answer user-answer">您的答案：${item.userAns}</div>
-                    <div class="review-answer correct-answer">正確答案：${item.question.answer} (${item.question.options[item.question.answer]})</div>
+                    <div class="review-question">${item.question.id}. ${parseMarkdownImages(item.question.question)}</div>
+                    <div class="review-answer user-answer">您的答案：${parseMarkdownImages(item.userAns)}</div>
+                    <div class="review-answer correct-answer">正確答案：${item.question.answer} (${parseMarkdownImages(item.question.options[item.question.answer])})</div>
                 `;
                 elements.wrongAnswersList.appendChild(el);
             });
