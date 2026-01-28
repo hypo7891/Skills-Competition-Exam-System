@@ -16,19 +16,34 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /**
-     * Helper to convert Markdown image syntax to HTML <img> tags.
-     * Handles: ![](media/image82.jpeg){width="..."}
+     * Helper to format content:
+     * 1. Convert Markdown image syntax to HTML <img> tags.
+     * 2. Handle Superscripts: 10^2^ or 10^2 -> <sup>...</sup>
+     * 3. Handle Subscripts: R~T~ or R_T -> <sub>...</sub>
      */
-    function parseMarkdownImages(text) {
+    function formatQuestionText(text) {
         if (!text || typeof text !== 'string') return text;
 
-        // Match Markdown ![]() followed by optional {...}
-        return text.replace(/!\[\]\(media\/image(\d+)\.(jpe?g|png|gif)\)({.*?})?/g, (match, num, ext) => {
+        // 1. Images: ![](media/image82.jpeg){width="..."}
+        let formatted = text.replace(/!\[\]\(media\/image(\d+)\.(jpe?g|png|gif)\)({.*?})?/g, (match, num, ext) => {
             const paddedNum = num.padStart(3, '0');
-            // Standardize extension and path
             const finalExt = ext === 'jpeg' ? 'jpg' : ext;
             return `<img src="questions/image/image${paddedNum}.${finalExt}" alt="image">`;
         });
+
+        // 2. Superscripts: ^2^ or ^2
+        // Match balanced first: ^text^
+        formatted = formatted.replace(/\^([^^]+)\^/g, '<sup>$1</sup>');
+        // Match shorthand for numbers/single letters: ^2 (if not already handled)
+        formatted = formatted.replace(/\^([a-zA-Z0-9]+)(?![^<]*>)/g, '<sup>$1</sup>');
+
+        // 3. Subscripts: ~text~ or _T
+        // Match balanced first: ~text~
+        formatted = formatted.replace(/~([^~]+)~/g, '<sub>$1</sub>');
+        // Match shorthand: _T or _1
+        formatted = formatted.replace(/_([a-zA-Z0-9]+)(?![^<]*>)/g, '<sub>$1</sub>');
+
+        return formatted;
     }
 
     // DOM Elements
@@ -431,11 +446,11 @@ document.addEventListener('DOMContentLoaded', () => {
             el.innerHTML = `
                  <div class="review-question">
                     <span style="display:inline-block; min-width: 40px; font-weight:800; color:var(--primary-color);">#${item.id}</span>
-                    <span style="font-weight: 500;">${parseMarkdownImages(qText)}</span>
+                    <span style="font-weight: 500;">${formatQuestionText(qText)}</span>
                  </div>
                  <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
-                    <div class="review-answer user-answer" style="margin-bottom:0; color: #ef4444; font-weight: 500;">您的答案 : ${parseMarkdownImages(userDisplay)}</div>
-                    <div class="review-answer correct-answer" style="margin-bottom:0; color: #10b981; font-weight: 600;">正確答案 : ${parseMarkdownImages(correctDisplay)}</div>
+                    <div class="review-answer user-answer" style="margin-bottom:0; color: #ef4444; font-weight: 500;">您的答案 : ${formatQuestionText(userDisplay)}</div>
+                    <div class="review-answer correct-answer" style="margin-bottom:0; color: #10b981; font-weight: 600;">正確答案 : ${formatQuestionText(correctDisplay)}</div>
                  </div>
                  <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
                     <div style="background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
@@ -454,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update Info
         elements.questionNumber.textContent = `Question ${state.currentIndex + 1}/${total}`;
         elements.progressBar.style.width = `${((state.currentIndex + 1) / total) * 100}%`;
-        elements.questionText.innerHTML = parseMarkdownImages(currentQ.question);
+        elements.questionText.innerHTML = formatQuestionText(currentQ.question);
 
         // Generate Options
         elements.optionsContainer.innerHTML = '';
@@ -469,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = `
                 <div class="option-marker">${key}</div>
-                <div class="option-text">${parseMarkdownImages(optionText)}</div>
+                <div class="option-text">${formatQuestionText(optionText)}</div>
             `;
             elements.optionsContainer.appendChild(card);
         });
@@ -568,9 +583,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.createElement('div');
                 el.className = 'review-item';
                 el.innerHTML = `
-                    <div class="review-question">${item.question.id}. ${parseMarkdownImages(item.question.question)}</div>
-                    <div class="review-answer user-answer">您的答案：${parseMarkdownImages(item.userAns)}</div>
-                    <div class="review-answer correct-answer">正確答案：${item.question.answer} (${parseMarkdownImages(item.question.options[item.question.answer])})</div>
+                    <div class="review-question">${item.question.id}. ${formatQuestionText(item.question.question)}</div>
+                    <div class="review-answer user-answer">您的答案：${formatQuestionText(item.userAns)}</div>
+                    <div class="review-answer correct-answer">正確答案：${item.question.answer} (${formatQuestionText(item.question.options[item.question.answer])})</div>
                 `;
                 elements.wrongAnswersList.appendChild(el);
             });
