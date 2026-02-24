@@ -473,23 +473,23 @@ body {
 }
 
 .card-examinee {
-    background: #f0f4ff;
-    border: 1.5px solid #c7d2fe;
+    background: #e8edff;
+    border: 2px solid #a5b4fc;
 }
 
 .card-fixed {
-    background: #f0fdf4;
-    border: 1.5px solid #bbf7d0;
+    background: #dcfce7;
+    border: 2px solid #86efac;
 }
 
 .card-random {
-    background: #fffbeb;
-    border: 1.5px solid #fde68a;
+    background: #fef9c3;
+    border: 2px solid #fde047;
 }
 
 .card-info {
-    background: #fdf4ff;
-    border: 1.5px solid #e9d5ff;
+    background: #f3e8ff;
+    border: 2px solid #d8b4fe;
 }
 
 .card-header {
@@ -576,7 +576,7 @@ kbd {
 }
 
 /* Responsive */
-@media (max-width: 700px) {
+@media (max-width: 520px) {
     .cards-grid {
         grid-template-columns: 1fr;
     }
@@ -588,7 +588,7 @@ kbd {
     }
 
     .title {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
     }
 
     .quiz-footer {
