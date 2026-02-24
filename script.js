@@ -8,11 +8,27 @@ document.addEventListener('DOMContentLoaded', () => {
         isQuizActive: false,
         timerInterval: null,
         timeElapsed: 0,
-        timeElapsed: 0,
         userName: '',
         vipList: [],
         currentBankName: '', // Track current bank display name
-        rawHistoryData: []  // Cache for filtering
+        rawHistoryData: [],  // Cache for filtering
+        selectedFixedRange: null // { start, end } 1-based inclusive
+    };
+
+    // Fixed mode range definitions per bank filename
+    // Each entry: { label, start, end } (1-based, inclusive)
+    const FIXED_RANGES = {
+        '職業安全工作倫理_題庫.json': [
+            { label: '1–20', start: 1, end: 20 },
+            { label: '21–40', start: 21, end: 40 },
+            { label: '41–60', start: 41, end: 60 },
+        ],
+        '__default__': [
+            { label: '1–50', start: 1, end: 50 },
+            { label: '51–100', start: 51, end: 100 },
+            { label: '101–150', start: 101, end: 150 },
+            { label: '151–200', start: 151, end: 200 },
+        ]
     };
 
     /**
@@ -56,6 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
         maxCountLabel: document.getElementById('max-count-label'),
         bankSelect: document.getElementById('bank-select'),
         startBtn: document.getElementById('start-btn'),
+        startFixedBtn: document.getElementById('start-fixed-btn'),
+        fixedRangeButtons: document.getElementById('fixed-range-buttons'),
         questionText: document.getElementById('question-text'),
         optionsContainer: document.getElementById('options-container'),
         progressBar: document.getElementById('progress-bar'),
@@ -194,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUIWithData() {
         if (state.allQuestions.length > 0) {
             elements.questionCountInput.max = state.allQuestions.length;
-            // Update the input value if it exceeds max
             if (parseInt(elements.questionCountInput.value) > state.allQuestions.length) {
                 elements.questionCountInput.value = state.allQuestions.length;
             }
@@ -204,6 +221,31 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.maxCountLabel.textContent = `沒有題目`;
             elements.startBtn.disabled = true;
         }
+        renderFixedRangeButtons();
+    }
+
+    function renderFixedRangeButtons() {
+        const bankFilename = elements.bankSelect.value;
+        const ranges = FIXED_RANGES[bankFilename] || FIXED_RANGES['__default__'];
+
+        state.selectedFixedRange = null;
+        elements.startFixedBtn.disabled = true;
+        elements.fixedRangeButtons.innerHTML = '';
+
+        ranges.forEach(range => {
+            const btn = document.createElement('button');
+            btn.className = 'range-btn';
+            btn.textContent = range.label;
+            btn.dataset.start = range.start;
+            btn.dataset.end = range.end;
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.selectedFixedRange = { start: range.start, end: range.end };
+                elements.startFixedBtn.disabled = state.allQuestions.length === 0;
+            });
+            elements.fixedRangeButtons.appendChild(btn);
+        });
     }
 
     function parseJSON(data) {
@@ -272,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupEventListeners() {
         elements.bankSelect.addEventListener('change', (e) => loadQuestions(e.target.value));
         elements.startBtn.addEventListener('click', startQuiz);
+        elements.startFixedBtn.addEventListener('click', startFixedQuiz);
         elements.historyBtn.addEventListener('click', showHistory);
         elements.historyBackBtn.addEventListener('click', () => switchScreen('start-screen'));
         elements.prevBtn.addEventListener('click', () => navigateQuestion(-1));
@@ -327,6 +370,39 @@ document.addEventListener('DOMContentLoaded', () => {
         state.timerInterval = setInterval(updateTimer, 1000);
 
         // Switch Screen
+        switchScreen('quiz-screen');
+        renderQuestion();
+    }
+
+    function startFixedQuiz() {
+        const name = elements.usernameInput.value.trim();
+        if (!name) {
+            alert('請輸入考生姓名');
+            return;
+        }
+        if (!state.selectedFixedRange) {
+            alert('請先選擇題目範圍');
+            return;
+        }
+        state.userName = name;
+
+        const { start, end } = state.selectedFixedRange;
+        // Questions are 1-based by id order; slice by index (0-based)
+        state.currentQuizQuestions = state.allQuestions.slice(start - 1, end);
+
+        if (state.currentQuizQuestions.length === 0) {
+            alert('該範圍沒有題目，請確認題庫是否足夠');
+            return;
+        }
+
+        state.currentIndex = 0;
+        state.userAnswers = {};
+        state.isQuizActive = true;
+        state.timeElapsed = 0;
+
+        if (state.timerInterval) clearInterval(state.timerInterval);
+        state.timerInterval = setInterval(updateTimer, 1000);
+
         switchScreen('quiz-screen');
         renderQuestion();
     }

@@ -5,6 +5,8 @@
     --secondary-dark: #cbd5e1;
     --success-color: #22c55e;
     --error-color: #ef4444;
+    --accent-color: #f59e0b;
+    --accent-dark: #d97706;
     --text-color: #1e293b;
     --text-light: #64748b;
     --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -45,7 +47,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 800px;
+    max-width: 1100px;
     background: var(--card-bg);
     backdrop-filter: blur(10px);
     border-radius: 24px;
@@ -89,13 +91,8 @@ body {
     }
 }
 
-/* Start Screen */
-#start-screen {
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    gap: 2rem;
-}
+
+
 
 .title {
     font-size: 2.5rem;
@@ -114,8 +111,7 @@ body {
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    max-width: 300px;
-    text-align: center;
+    text-align: left;
 }
 
 .control-group label {
@@ -425,17 +421,174 @@ body {
     background: var(--text-light);
 }
 
+/* Accent Button */
+.accent-btn {
+    background: var(--accent-color);
+    color: white;
+}
+
+.accent-btn:hover:not(:disabled) {
+    background: var(--accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(245, 158, 11, 0.25);
+}
+
+/* Full-width button */
+.full-width-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* ── Card Grid ── */
+#start-screen {
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 1.5rem;
+    text-align: left;
+}
+
+#start-screen .title {
+    text-align: center;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+}
+
+.info-card {
+    border-radius: 16px;
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    transition: var(--transition);
+}
+
+.info-card:hover {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.13);
+    transform: translateY(-2px);
+}
+
+.card-examinee {
+    background: #f0f4ff;
+    border: 1.5px solid #c7d2fe;
+}
+
+.card-fixed {
+    background: #f0fdf4;
+    border: 1.5px solid #bbf7d0;
+}
+
+.card-random {
+    background: #fffbeb;
+    border: 1.5px solid #fde68a;
+}
+
+.card-info {
+    background: #fdf4ff;
+    border: 1.5px solid #e9d5ff;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.2rem;
+}
+
+.card-icon {
+    font-size: 1.4rem;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    flex: 1;
+}
+
+.card-desc {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* Range buttons for fixed mode */
+.range-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.range-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 2px solid #6366f1;
+    background: white;
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.range-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.range-btn.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+/* Info list */
+.info-list ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.info-list li {
+    font-size: 0.88rem;
+    color: var(--text-color);
+    line-height: 1.5;
+}
+
+kbd {
+    background: #e2e8f0;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.82rem;
+    font-family: monospace;
+    border: 1px solid #cbd5e1;
+}
+
 /* Responsive */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
     .container {
         padding: 20px;
-        height: 100vh;
         border-radius: 0;
         min-height: auto;
     }
 
     .title {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .quiz-footer {
@@ -445,6 +598,18 @@ body {
     .btn {
         padding: 12px 20px;
     }
+}
+
+@media (max-width: 600px) {
+    .container {
+        height: 100vh;
+    }
+}
+
+.result-footer {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .version-tag {

@@ -17,42 +17,87 @@
         <div id="start-screen" class="screen active">
             <h1 class="title">新科國中技藝競賽學科題庫測驗系統</h1>
 
-
-            <div class="control-group">
-                <label for="username">考生姓名</label>
-                <input type="text" id="username" placeholder="請輸入姓名" autocomplete="off">
-            </div>
-
-            <div class="control-group">
-                <label for="bank-select">選擇題庫 / 手動上傳</label>
-                <div class="bank-selection-row">
-                    <select id="bank-select">
-                        <option value="基礎描繪組_學科題庫.json">基礎描繪組</option>
-                        <option value="工業電子組_學科題庫.json">工業電子組</option>
-                        <option value="美容組_學科題庫.json">美容組</option>
-                        <option value="職業安全工作倫理_題庫.json">職業安全工作倫理</option>
-                    </select>
-                    <div class="file-upload-wrapper">
-                        <input type="file" id="csv-upload" accept=".csv,.json" class="file-input-hidden" />
-                        <label for="csv-upload" class="btn secondary-btn upload-btn">
-                            上傳
-                        </label>
+            <div class="cards-grid">
+                <!-- Card 1: 考生資訊 -->
+                <div class="info-card card-examinee">
+                    <div class="card-header">
+                        <span class="card-icon">👤</span>
+                        <h2 class="card-title">① 考生資訊</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="control-group">
+                            <label for="username">考生姓名</label>
+                            <input type="text" id="username" placeholder="請輸入姓名" autocomplete="off">
+                        </div>
+                        <div class="control-group">
+                            <label for="bank-select">選擇題庫 / 手動上傳</label>
+                            <div class="bank-selection-row">
+                                <select id="bank-select">
+                                    <option value="基礎描繪組_學科題庫.json">基礎描繪組</option>
+                                    <option value="工業電子組_學科題庫.json">工業電子組</option>
+                                    <option value="美容組_學科題庫.json">美容組</option>
+                                    <option value="職業安全工作倫理_題庫.json">職業安全工作倫理</option>
+                                </select>
+                                <div class="file-upload-wrapper">
+                                    <input type="file" id="csv-upload" accept=".csv,.json" class="file-input-hidden" />
+                                    <label for="csv-upload" class="btn secondary-btn upload-btn">
+                                        上傳
+                                    </label>
+                                </div>
+                            </div>
+                            <span id="max-count-label" class="info-text">載入中...</span>
+                        </div>
+                        <button id="history-btn" class="btn secondary-btn full-width-btn">📋 錯題回顧</button>
                     </div>
                 </div>
-            </div>
 
-            <div class="control-group">
-                <label for="question-count">測驗題數</label>
-                <input type="number" id="question-count" min="1" value="20">
-                <span id="max-count-label" class="info-text">載入中...</span>
-            </div>
+                <!-- Card 2: 固定出題模式 -->
+                <div class="info-card card-fixed">
+                    <div class="card-header">
+                        <span class="card-icon">📌</span>
+                        <h2 class="card-title">② 固定出題模式</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-desc">按照題庫順序固定抽題，適合系統性練習。</p>
+                        <div class="range-buttons" id="fixed-range-buttons">
+                            <!-- Injected by JS based on selected bank -->
+                        </div>
+                        <button id="start-fixed-btn" class="btn primary-btn full-width-btn" disabled>▶ 開始固定出題</button>
+                    </div>
+                </div>
 
+                <!-- Card 3: 隨機出題模式 -->
+                <div class="info-card card-random">
+                    <div class="card-header">
+                        <span class="card-icon">🎲</span>
+                        <h2 class="card-title">③ 隨機出題模式</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-desc">從題庫中隨機抽取題目，適合模擬考試練習。</p>
+                        <div class="control-group">
+                            <label for="question-count">測驗題數</label>
+                            <input type="number" id="question-count" min="1" value="20">
+                        </div>
+                        <button id="start-btn" class="btn accent-btn full-width-btn" disabled>🎲 開始隨機出題</button>
+                    </div>
+                </div>
 
-
-            <div class="button-group"
-                style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-top: 1rem;">
-                <button id="start-btn" class="btn primary-btn" disabled style="flex: 2;">開始測驗</button>
-                <button id="history-btn" class="btn secondary-btn" style="flex: 1;">錯題回顧</button>
+                <!-- Card 4: 說明 -->
+                <div class="info-card card-info">
+                    <div class="card-header">
+                        <span class="card-icon">ℹ️</span>
+                        <h2 class="card-title">④ 說明</h2>
+                    </div>
+                    <div class="card-body info-list">
+                        <ul>
+                            <li>📌 <strong>固定出題</strong>：依題號順序選取固定範圍，確保覆蓋所有題目。</li>
+                            <li>🎲 <strong>隨機出題</strong>：從整個題庫隨機抽取指定數量題目。</li>
+                            <li>📋 <strong>錯題回顧</strong>：需輸入姓名並具備權限才可使用。</li>
+                            <li>⌨️ 作答中可使用 <kbd>←</kbd> <kbd>→</kbd> 鍵切換題目。</li>
+                            <li>💾 測驗結束後可下載成績單。</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -133,8 +178,8 @@
         </div>
     </div>
 
-    <div class="version-tag">Ver 1.3 | 維護人員 資料組楊家慎</div>
-    <script src="script.js?v=1.3"></script>
+    <div class="version-tag">Ver 1.4 | 維護人員 資料組楊家慎</div>
+    <script src="script.js?v=1.4"></script>
 </body>
 
 </html>
