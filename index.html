@@ -82,20 +82,68 @@
                     </div>
                 </div>
 
-                <!-- Card 4: 說明 -->
+                <!-- Card 4: 出題模式 (紙本匯出) -->
+                <div class="info-card card-exam">
+                    <div class="card-header">
+                        <span class="card-icon">🖨️</span>
+                        <h2 class="card-title">④ 出題模式 (紙本匯出)</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-desc">將題目匯出為網頁格式，方便預覽與紙本列印。</p>
+                        
+                        <div class="control-group">
+                            <label>1. 選擇出題方式</label>
+                            <div class="tab-controls" style="display: flex; gap: 5px; margin-bottom: 10px;">
+                                <button id="exam-fixed-tab" class="btn secondary-btn small-btn active" style="flex: 1; padding: 6px;">固定範圍</button>
+                                <button id="exam-random-tab" class="btn secondary-btn small-btn" style="flex: 1; padding: 6px;">隨機抽題</button>
+                            </div>
+                        </div>
+
+                        <div id="exam-fixed-section">
+                            <div class="range-buttons" id="exam-range-buttons">
+                                <!-- Injected by JS -->
+                            </div>
+                        </div>
+
+                        <div id="exam-random-section" class="hidden">
+                            <div class="control-group">
+                                <label for="exam-question-count">抽題數量</label>
+                                <input type="number" id="exam-question-count" min="1" value="20">
+                            </div>
+                        </div>
+
+                        <button id="generate-paper-btn" class="btn primary-btn full-width-btn" style="margin-top: 10px;" disabled>📄 生成考卷網頁</button>
+                    </div>
+                </div>
+
+                <!-- Card 5: 說明 -->
                 <div class="info-card card-info">
                     <div class="card-header">
                         <span class="card-icon">ℹ️</span>
-                        <h2 class="card-title">④ 說明</h2>
+                        <h2 class="card-title">⑤ 說明</h2>
                     </div>
                     <div class="card-body info-list">
                         <ul>
                             <li>📌 <strong>固定出題</strong>：依題號順序選取固定範圍，確保覆蓋所有題目。</li>
                             <li>🎲 <strong>隨機出題</strong>：從整個題庫隨機抽取指定數量題目。</li>
+                            <li>🖨️ <strong>出題模式</strong>：生成適合列印的網頁，可選擇固定範圍或隨機抽題。</li>
                             <li>📋 <strong>錯題回顧</strong>：需輸入姓名並具備權限才可使用。</li>
                             <li>⌨️ 作答中可使用 <kbd>←</kbd> <kbd>→</kbd> 鍵切換題目。</li>
                             <li>💾 測驗結束後可下載成績單。</li>
                         </ul>
+                    </div>
+                </div>
+
+                <!-- Card 6: 教師專區 -->
+                <div class="info-card card-teacher">
+                    <div class="card-header">
+                        <span class="card-icon">👨‍🏫</span>
+                        <h2 class="card-title">⑥ 教師專區</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-desc">全體學生數據統計與高頻錯誤分析，僅限教師使用。</p>
+                        <button id="teacher-portal-btn" class="btn secondary-btn full-width-btn"
+                            style="margin-top: auto;">🔒 教師登入</button>
                     </div>
                 </div>
             </div>
@@ -111,13 +159,25 @@
 
             <div id="history-loading" class="info-text" style="text-align: center; margin: 20px;">載入中...</div>
 
-            <div id="history-filter-container" style="display: none; margin: 10px 0 20px; text-align: center;">
-                <label for="history-bank-filter" style="font-weight: 600; margin-right: 10px;">題庫篩選：</label>
-                <select id="history-bank-filter"
-                    style="padding: 8px; border-radius: 8px; border: 1px solid #ddd; outline: none; background: white; min-width: 150px;">
-                    <option value="all">全部記錄</option>
-                </select>
+            <div id="history-filter-container" style="display: none; margin: 10px 0 20px;">
+                <div class="stats-dashboard" id="history-stats">
+                    <!-- Stat cards injected via JS -->
+                </div>
+
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="history-bank-filter">題庫篩選</label>
+                        <select id="history-bank-filter">
+                            <option value="all">全部記錄</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="history-search">關鍵字搜尋</label>
+                        <input type="text" id="history-search" placeholder="搜尋題目或答案...">
+                    </div>
+                </div>
             </div>
+
 
             <div class="review-section" id="history-content">
                 <div id="history-list" class="wrong-list">
@@ -176,9 +236,66 @@
                 <button id="restart-btn" class="btn primary-btn">再次測驗</button>
             </div>
         </div>
+
+        <!-- Teacher Screen -->
+        <div id="teacher-screen" class="screen hidden">
+            <div class="quiz-header" style="justify-content: center; position: relative;">
+                <h2 class="title" style="font-size: 1.8rem;">教師管理後台</h2>
+                <button id="teacher-back-btn" class="btn secondary-btn"
+                    style="position: absolute; left: 0; padding: 8px 16px;">返回</button>
+            </div>
+
+            <div class="stats-dashboard" id="teacher-stats">
+                <!-- Global Summary Stats -->
+            </div>
+
+            <div class="teacher-controls" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <div class="filter-group" style="flex: 1; min-width: 200px;">
+                    <label>學生名單搜尋</label>
+                    <input type="text" id="teacher-student-search" placeholder="輸入姓名搜尋...">
+                </div>
+            </div>
+
+            <div class="teacher-content-grid">
+                <div class="info-card">
+                    <div class="card-header"><span class="card-icon">👥</span>
+                        <h3 class="card-title">學生作答概況</h3>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-responsive">
+                            <table class="teacher-table">
+                                <thead>
+                                    <tr>
+                                        <th>姓名</th>
+                                        <th>最高分</th>
+                                        <th>次數</th>
+                                        <th>最後練習</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teacher-student-list">
+                                    <!-- List of students injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-header"><span class="card-icon">🔥</span>
+                        <h3 class="card-title">高頻錯誤題目 (Top 10)</h3>
+                    </div>
+                    <div class="card-body" id="teacher-top-errors">
+                        <!-- Top errors injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="version-tag">Ver 2.01 | 維護人員 資料組楊家慎</div>
+    <div class="version-tag">
+        Ver 2.01 | 維護人員 資料組楊家慎
+    </div>
     <script src="script.js?v=2.01"></script>
 </body>
 
