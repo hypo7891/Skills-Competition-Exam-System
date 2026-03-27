@@ -100,6 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
         historyContent: document.getElementById('history-content'),
         historyBankFilter: document.getElementById('history-bank-filter'),
         historyFilterContainer: document.getElementById('history-filter-container'),
+        
+        // Exam Mode
+        examBankSelect: document.getElementById('exam-bank-select'),
+        examFixedTab: document.getElementById('exam-fixed-tab'),
         historySearch: document.getElementById('history-search'),
         historyStats: document.getElementById('history-stats'),
         teacherScreen: document.getElementById('teacher-screen'),
@@ -148,12 +152,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Populate select
             const select = elements.bankSelect;
+            const examSelect = elements.examBankSelect;
             select.innerHTML = ''; // Clear existing
+            examSelect.innerHTML = '';
             manifest.forEach(filename => {
                 const option = document.createElement('option');
                 option.value = filename;
                 option.textContent = filename.replace('.json', '');
                 select.appendChild(option);
+
+                const option2 = option.cloneNode(true);
+                examSelect.appendChild(option2);
             });
 
             // Load first bank
@@ -270,6 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             elements.fixedRangeButtons.appendChild(btn);
         });
+
+        // Auto-select first range if available
+        const firstBtn = elements.fixedRangeButtons.querySelector('.range-btn');
+        if (firstBtn) firstBtn.click();
     }
 
     function renderExamRangeButtons() {
@@ -292,6 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             elements.examRangeButtons.appendChild(btn);
         });
+
+        // Auto-select first range if available
+        const firstExamBtn = elements.examRangeButtons.querySelector('.range-btn');
+        if (firstExamBtn) firstExamBtn.click();
     }
 
     function parseJSON(data) {
@@ -358,7 +375,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupEventListeners() {
-        elements.bankSelect.addEventListener('change', (e) => loadQuestions(e.target.value));
+        elements.bankSelect.addEventListener('change', (e) => {
+            if (elements.examBankSelect) elements.examBankSelect.value = e.target.value;
+            loadQuestions(e.target.value);
+        });
+        if (elements.examBankSelect) {
+            elements.examBankSelect.addEventListener('change', (e) => {
+                elements.bankSelect.value = e.target.value;
+                loadQuestions(e.target.value);
+            });
+        }
         elements.startBtn.addEventListener('click', startQuiz);
         elements.startFixedBtn.addEventListener('click', startFixedQuiz);
         elements.historyBtn.addEventListener('click', showHistory);
@@ -1027,6 +1053,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <base href="${window.location.href}">
     <title>${bankName} - 考卷匯出</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
@@ -1081,6 +1108,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `).join('')}
+    </div>
+
+    <!-- 增加標準答案卷 -->
+    <div class="answer-sheet" style="page-break-before: always; margin-top: 30px;">
+        <h2 style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px;">標準答案卷</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; margin-top: 20px; font-size: 16px;">
+            ${questionsToPrint.map((q, idx) => `
+                <div><b>${idx + 1}.</b> ${q.answer}</div>
+            `).join('')}
+        </div>
     </div>
 
     <div class="footer">
