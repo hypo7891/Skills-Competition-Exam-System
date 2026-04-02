@@ -16,70 +16,83 @@
 
 function doGet(e) {
   try {
-    // 檢查是否有傳入 name 參數
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var lastRow = sheet.getLastRow();
+    
+    if (lastRow < 2) {
+      return ContentService.createTextOutput(JSON.stringify([]))
+      .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 模式 1: 老師視角 (取得所有資料)
+    if (e.parameter.mode === 'all') {
+      // 簡單的密碼檢查 (可在這裡修改為更複雜的驗證)
+      if (e.parameter.passcode !== 'teacher888') {
+        return ContentService.createTextOutput(JSON.stringify({"result": "error", "error": "Invalid passcode"}))
+        .setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      var allData = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
+      var formattedAll = allData.map(function(row) {
+        return {
+          time: row[0],
+          name: row[1],
+          score: row[2],
+          bank: row[3],
+          summary: row[4],
+          wrong_ids: row[5],
+          detail: row[6]
+        };
+      });
+      
+      return ContentService.createTextOutput(JSON.stringify(formattedAll))
+      .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 模式 2: 學生視角 (依姓名取得統計)
     var name = e.parameter.name;
     if (!name) {
        return ContentService.createTextOutput(JSON.stringify({"result": "error", "error": "Missing name parameter"}))
       .setMimeType(ContentService.MimeType.JSON);
     }
     
-    // 去除輸入名字的前後空白，並轉為字串
     name = String(name).trim();
-
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var lastRow = sheet.getLastRow();
-    
-    // 若無資料
-    if (lastRow < 2) {
-      return ContentService.createTextOutput(JSON.stringify([]))
-      .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    // 取得所有資料
-    // 範圍：A2 到 G最後一列 (變更為 7 欄)
     var data = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
-    
-    // 統計錯題頻率與內容
-    var stats = {}; // { "id_bank": { count: 0, detail: object } }
+    var stats = {}; 
     
     for (var i = 0; i < data.length; i++) {
       var row = data[i];
-      var rowName = row[1]; // B欄: 姓名
-      var currentBank = String(row[3]).trim(); // D欄: 題庫類型
+      var rowName = String(row[1]).trim();
+      var currentBank = String(row[3]).trim();
       
-      // 確保試算表中的名字也轉為字串並去除空白
-      var safeRowName = String(rowName).trim();
-      
-      if (safeRowName === name) {
-        var cellF = row[5]; // F欄: 錯題編號 (原 E 欄)
-        var cellG = row[6]; // G欄: 詳細內容 (原 F 欄)
+      if (rowName === name) {
+        var cellF = row[5]; 
+        var cellG = row[6]; 
         
         var wrongIds = [];
         var detailMap = {};
         
-        // 支援 JSON 在 F 欄的情況 (防呆，處理欄位位移的情況)
-        var isColumnFShiftedJSON = false;
+        // 處理遺留資料或格式位移 (防呆)
+        var isJSON = false;
         try {
           if (typeof cellF === 'string' && cellF.trim().charAt(0) === '[') {
              var parsed = JSON.parse(cellF);
              if (Array.isArray(parsed)) {
-               isColumnFShiftedJSON = true;
+               isJSON = true;
                parsed.forEach(function(item) {
                  wrongIds.push(item.id);
                  detailMap[item.id] = item;
                });
              }
           }
-        } catch (e) { /* Not JSON, fallback to standard handling */ }
+        } catch (e) {}
         
-        if (!isColumnFShiftedJSON) {
-           // 標準格式：F欄是ID列表，G欄是JSON詳細資料
+        if (!isJSON) {
            if (typeof cellF === 'string') {
               wrongIds = cellF.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ""; });
            } else if (typeof cellF === 'number') {
               wrongIds = [cellF.toString()];
            }
-           
            if (cellG) {
               try {
                 var details = JSON.parse(cellG);
@@ -88,18 +101,16 @@ function doGet(e) {
                      detailMap[item.id] = item;
                    });
                  }
-              } catch (e) { /* ignore */ }
+              } catch (e) {}
            }
         }
 
         wrongIds.forEach(function(id) {
-           // 複合鍵：id + 題庫，確保不同題庫的同 ID 不會混淆
            var key = id + "_" + currentBank;
            if (!stats[key]) {
              stats[key] = { count: 0, detail: null, bank: currentBank, id: id };
            }
            stats[key].count++;
-           
            if (!stats[key].detail && detailMap[id]) {
              stats[key].detail = detailMap[id];
            }
@@ -107,18 +118,13 @@ function doGet(e) {
       }
     }
     
-    // 轉為陣列
     var resultList = [];
     for (var key in stats) {
       if (stats.hasOwnProperty(key)) {
         var item = stats[key];
-        // 取得詳細資料，若無則提供預設值
-        var detail = item.detail || { id: item.id, q: "題目資料缺失", ans: "?", correct: "?", correct_text: "", ans_text: "" };
-        
+        var detail = item.detail || { id: item.id, q: "資料缺失", ans: "?", correct: "?", correct_text: "", ans_text: "" };
         resultList.push({
-          id: item.id,
-          bank_type: item.bank,
-          count: item.count,
+          id: item.id, bank_type: item.bank, count: item.count,
           q: detail.q || detail.question,
           ans: detail.ans || detail.userAns, 
           ans_text: detail.ans_text || detail.userAnsText || "",
@@ -128,11 +134,7 @@ function doGet(e) {
       }
     }
     
-    // 排序：出現率由高至低
-    resultList.sort(function(a, b) {
-      return b.count - a.count;
-    });
-    
+    resultList.sort(function(a, b) { return b.count - a.count; });
     return ContentService.createTextOutput(JSON.stringify(resultList))
       .setMimeType(ContentService.MimeType.JSON);
       
@@ -141,6 +143,7 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
+
 
 function doPost(e) {
   try {

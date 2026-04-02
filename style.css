@@ -73,11 +73,213 @@ body {
     pointer-events: none;
 }
 
+/* History Dashboard & Filters */
+.stats-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.filter-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.filter-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+@media (max-width: 600px) {
+    .filter-controls {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Enhanced Review Item */
+.review-item {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    transition: box-shadow 0.2s;
+}
+
+.review-item:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+
+/* History Dashboard & Filters */
+.stats-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.filter-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.filter-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+@media (max-width: 600px) {
+    .filter-controls {
+        grid-template-columns: 1fr;
+    }
+}
+
+.review-question {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.review-answer {
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+}
+
+.user-answer {
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    color: var(--error-color);
+}
+
+.correct-answer {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: var(--success-color);
+    font-weight: 500;
+}
+
 .screen.active {
     display: flex;
     opacity: 1;
     animation: fadeIn 0.5s forwards;
 }
+
 
 @keyframes fadeIn {
     from {
@@ -91,8 +293,63 @@ body {
     }
 }
 
+/* --- Teacher Dashboard --- */
+.teacher-content-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 20px;
+}
 
+@media (max-width: 900px) {
+    .teacher-content-grid {
+        grid-template-columns: 1fr;
+    }
+}
 
+.table-responsive {
+    overflow-x: auto;
+}
+
+.teacher-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.teacher-table th,
+.teacher-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.teacher-table th {
+    background: rgba(0, 0, 0, 0.02);
+    font-weight: 500;
+}
+
+.teacher-table tr:hover {
+    background: rgba(0, 0, 0, 0.01);
+}
+
+.teacher-top-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+}
+
+.teacher-top-item .count-badge {
+    background: var(--accent-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
 
 .title {
     font-size: 2.5rem;
@@ -453,7 +710,7 @@ body {
 
 .cards-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.2rem;
 }
 
@@ -490,6 +747,11 @@ body {
 .card-info {
     background: #f3e8ff;
     border: 2px solid #d8b4fe;
+}
+
+.card-teacher {
+    background: #ffedd5;
+    border: 2px solid #fdba74;
 }
 
 .card-header {
@@ -616,10 +878,67 @@ kbd {
     position: fixed;
     bottom: 10px;
     right: 15px;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(0, 0, 0, 0.3);
     font-size: 0.8rem;
     font-weight: 300;
     pointer-events: none;
     z-index: 1000;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.version-tag a:hover {
+    color: var(--primary-color) !important;
+    opacity: 1 !important;
+}
+
+/* Exam Mode Specific Styles */
+.card-exam {
+    background: #e0f2fe;
+    border: 2px solid #7dd3fc;
+}
+
+.small-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+.btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.tab-controls .btn {
+    border: 1px solid var(--secondary-dark);
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.tab-controls .btn:hover:not(.active) {
+    background: #f1f5f9;
+}
+
+/* Tab content visibility */
+.hidden {
+    display: none !important;
+}
+
+/* Print Overrides */
+@media print {
+    body {
+        background: white !important;
+        padding: 0 !important;
+    }
+
+    .container, 
+    .background-animation,
+    .version-tag,
+    .actions,
+    .no-print {
+        display: none !important;
+    }
+
+    /* If we were printing the main page, we'd need these, 
+       but we are generating a new window for printing, 
+       so these rules apply to the printWindow document. 
+       The rules below are mostly for documentation or if 
+       one were to print the main screen. */
 }
